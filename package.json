@@ -42,7 +42,6 @@
     "webpack": "^5.44.0"
   },
   "scripts": {
-    "build": "tsc && npm run start",
     "test": "gulp",
     "unit": "gulp unit",
     "style": "gulp style",
