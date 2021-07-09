@@ -224,7 +224,7 @@ const runCommand = async (message: Message, command: Command, args: string[]) =>
 }
 
 client.on(Events.READY, async () => {
-  log.info(`Client is ready! Logged in as: Name: ${client.info.pushname} - WhatsApp ID: ${client.info.wid}`, client)
+  log.info(`Client is ready! Logged in as: Name: ${client.info.pushname} - WhatsApp ID: ${client.info.wid.user}`, client)
 
   if (whatsappClient.loadedModules.size > 0) {
     savedModules.push(...whatsappClient.loadedModules.keys())
@@ -242,7 +242,7 @@ client.on(Events.READY, async () => {
     }
   })
 
-  console.log(`Client is ready! Name: ${client.info.pushname} - WhatsApp ID: ${client.info.wid}`);
+  console.log(`Client is ready! Name: ${client.info.pushname} - WhatsApp ID: ${client.info.wid.user}`);
 });
 
 const defaultCommand: Command = {
@@ -268,7 +268,9 @@ client.on(Events.MESSAGE_RECEIVED, async (message: Message) => {
   if (!whatsappClient.prefixes.has(message.from)) {
     whatsappClient.prefixes.set(message.from, "!")
   }
-  const prefix: string = whatsappClient.prefixes.get(message.from) ?? '';
+
+  //const prefix: string = whatsappClient.prefixes.get(message.from) ?? '';
+  const prefix = '!';
   if (message.body.startsWith(`${prefix}`)) {
     const commandName: string = message.body.split(prefix)[1].split(' ')[0]
     if (whatsappClient.loadedCommands.has(commandName)) {
@@ -285,7 +287,9 @@ client.on(Events.MESSAGE_CREATE, async (message: Message) => {
   if (!whatsappClient.prefixes.has(message.from)) {
     whatsappClient.prefixes.set(message.from, "!")
   }
-  const prefix: string = 'test' + whatsappClient.prefixes.get(message.from) ?? '';
+
+  //const prefix: string = 'test' + whatsappClient.prefixes.get(message.from) ?? '';
+  const prefix = '!';
   if (message.author === ownerId || message.from === ownerId) {
     if (message.body.startsWith(`${prefix}`)) {
       const commandName: string = message.body.split(`${prefix}`)[1].split(' ')[0];
