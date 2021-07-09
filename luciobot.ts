@@ -17,7 +17,10 @@ type ClientWrapper = {
 
 
 const clientOptions: ClientOptions = {
-  puppeteer : {headless: true}
+  puppeteer : {
+    headless: true,
+    args: ['--no-sandbox','--disable-setuid-sandbox']
+  }
 }
 
 const chromePath = process.env.CHROME_PATH ?? '';
