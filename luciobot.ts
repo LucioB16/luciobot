@@ -1,6 +1,6 @@
 'use strict'
 
-import {Client, Message, Events, ClientOptions} from "whatsapp-web.js";
+import { Client, Message, Events, ClientOptions } from 'whatsapp-web.js'
 import * as qrcode from 'qrcode-terminal'
 import * as dotenv from 'dotenv'
 import * as fs from 'fs'
@@ -15,53 +15,51 @@ type ClientWrapper = {
   [key: string]: any
 }
 
-
 const clientOptions: ClientOptions = {
-  puppeteer : {
+  puppeteer: {
     headless: true,
-    args: ['--no-sandbox','--disable-setuid-sandbox']
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
   }
 }
 
-const chromePath = process.env.CHROME_PATH ?? '';
+const chromePath = process.env.CHROME_PATH ?? ''
 
-if(chromePath !== ''){
+if (chromePath !== '') {
   clientOptions.puppeteer['executablePath'] = chromePath
 }
 
-const sessionString = process.env.WA_SESSION ?? '';
+const sessionString = process.env.WA_SESSION ?? ''
 
 if (sessionString !== '') {
-  clientOptions.session = JSON.parse(sessionString);
+  clientOptions.session = JSON.parse(sessionString)
 }
 
-const client = new Client(clientOptions);
+const client = new Client(clientOptions)
 
 const whatsappClient: ClientWrapper = {
   loadedCommands: new Map<string, Command>(),
   loadedModules: new Map<string, Module>(),
   prefixes: new Map<string, string>() // TODO: get from DB
-};
+}
 
-whatsappClient['client'] = client;
+whatsappClient['client'] = client
 
-whatsappClient['log'] = log;
-
+whatsappClient['log'] = log
 
 if (!process.env.OWNER_WHATSAPP_ID) {
   log.error('No owner user WhatsApp ID supplied. Set the OWNER_WHATSAPP_ID environment variable.')
 }
 
-const ownerId = process.env.OWNER_WHATSAPP_ID ?? '';
+const ownerId = process.env.OWNER_WHATSAPP_ID ?? ''
 
 client.on(Events.QR_RECEIVED, (qr) => {
-  qrcode.generate(qr, {small: true});
-  log.info("Scan the QR Code to start the whatsapp web client.");
-});
+  qrcode.generate(qr, { small: true })
+  log.info('Scan the QR Code to start the whatsapp web client.')
+})
 
 client.on(Events.AUTHENTICATED, (session) => {
-  log.info("Copy the value below without line breaks and set it to WA_SESSION environment variable.\n" +
-    `'${JSON.stringify(session)}'`);
+  log.info('Copy the value below without line breaks and set it to WA_SESSION environment variable.\n' +
+    `'${JSON.stringify(session)}'`)
 })
 
 export type Command = {
@@ -74,18 +72,18 @@ export type Command = {
   secret?: boolean,
   cooldown?: number,
   aliases?: string[],
-  run(message: Message, client: Client, args: string[]): Promise<Message | undefined>
+  run (message: Message, client: Client, args: string[]): Promise<Message | undefined>
 }
 
 export type Event = {
   trigger: string,
-  event(): Promise<any>  // TODO: is this correct? Verify with further examples
+  event (): Promise<any>  // TODO: is this correct? Verify with further examples
 }
 
 export type Job = {
   period: number,
   runInstantly: boolean,
-  job(client: Client): Promise<void>,
+  job (client: Client): Promise<void>,
   interval: NodeJS.Timeout
 }
 
@@ -187,7 +185,7 @@ export const unloadModule = (name: string) => {
 
 const parseArgs = (messageContent: string): string[] => {
   if (!messageContent) return []
-  return messageContent.split(" ")
+  return messageContent.split(' ')
 }
 
 const runCommand = async (message: Message, command: Command, args: string[]) => {
@@ -242,8 +240,8 @@ client.on(Events.READY, async () => {
     }
   })
 
-  console.log(`Client is ready! Name: ${client.info.pushname} - WhatsApp ID: ${client.info.wid.user}`);
-});
+  console.log(`Client is ready! Name: ${client.info.pushname} - WhatsApp ID: ${client.info.wid.user}`)
+})
 
 const defaultCommand: Command = {
   name: 'default',
@@ -257,20 +255,23 @@ const defaultCommand: Command = {
     try {
       return await message.reply(out)
     } catch (e) {
-      if (e.message === 'Cannot send an empty message') return message.reply('\u200e')
-      else throw e
+      if (e.message === 'Cannot send an empty message') {
+        return message.reply('\u200e')
+      } else {
+        throw e
+      }
     }
   }
-};
+}
 
 client.on(Events.MESSAGE_RECEIVED, async (message: Message) => {
   await log.info(`Chat: ${message.from} - Author: ${message.author} - Content: ${message.body}`)
   if (!whatsappClient.prefixes.has(message.from)) {
-    whatsappClient.prefixes.set(message.from, "!")
+    whatsappClient.prefixes.set(message.from, '!')
   }
 
-  //const prefix: string = whatsappClient.prefixes.get(message.from) ?? '';
-  const prefix = '!';
+  // const prefix: string = whatsappClient.prefixes.get(message.from) ?? '';
+  const prefix = '!'
   if (message.body.startsWith(`${prefix}`)) {
     const commandName: string = message.body.split(prefix)[1].split(' ')[0]
     if (whatsappClient.loadedCommands.has(commandName)) {
@@ -285,21 +286,22 @@ client.on(Events.MESSAGE_RECEIVED, async (message: Message) => {
 client.on(Events.MESSAGE_CREATE, async (message: Message) => {
   await log.info(`Chat: ${message.from} - Author: ${message.author} - Content: ${message.body}`)
   if (!whatsappClient.prefixes.has(message.from)) {
-    whatsappClient.prefixes.set(message.from, "!")
+    whatsappClient.prefixes.set(message.from, '!')
   }
 
-  //const prefix: string = 'test' + whatsappClient.prefixes.get(message.from) ?? '';
-  const prefix = '!';
+  // const prefix: string = 'test' + whatsappClient.prefixes.get(message.from) ?? '';
+  const prefix = '!'
   if (message.author === ownerId || message.from === ownerId) {
     if (message.body.startsWith(`${prefix}`)) {
-      const commandName: string = message.body.split(`${prefix}`)[1].split(' ')[0];
+      const commandName: string = message.body.split(`${prefix}`)[1].split(' ')[0]
       if (whatsappClient.loadedCommands.has(commandName)) {
         const commandArgs: string = message.body.substr(prefix.length + 1 + commandName.length)
-
+        /*
         if (message.hasQuotedMsg) {
-          let quotedMessage = await message.getQuotedMessage();
+          let quotedMessage = await message.getQuotedMessage()
           message.from = quotedMessage.from
         }
+         */
 
         await runCommand(message, whatsappClient.loadedCommands.get(commandName) ?? defaultCommand, parseArgs(commandArgs))
       } else {
@@ -323,4 +325,4 @@ client.on(Events.BATTERY_CHANGED, (batteryInfo) => {
   }
 })
 
-client.initialize();
+client.initialize()

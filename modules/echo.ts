@@ -1,6 +1,6 @@
-import {Client, Message} from 'whatsapp-web.js'
-import {Command} from "../luciobot";
-import * as log from "../lib/log";
+import { Client, Message } from 'whatsapp-web.js'
+import { Command } from '../luciobot'
+import * as log from '../lib/log'
 
 export const name = 'echo'
 export const commands: Command[] = [

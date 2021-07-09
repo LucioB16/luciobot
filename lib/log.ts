@@ -1,17 +1,17 @@
 'use strict'
-import {Client} from 'whatsapp-web.js'
+import { Client } from 'whatsapp-web.js'
 
 type Options = {
   type: string,
   message: string,
-  client?: Client,
+  client?: Client
 }
 
 export const log = async (options: Options) => {
-  console.log(`${options.type.toUpperCase()}: ${options.message}`);
+  console.log(`${options.type.toUpperCase()}: ${options.message}`)
   if (options.client) {
     return await options.client.sendMessage(process.env.OWNER_WHATSAPP_ID ?? '',
-      `${options.type.toUpperCase()}: ${options.message}`);
+      `${options.type.toUpperCase()}: ${options.message}`)
   }
 }
 
