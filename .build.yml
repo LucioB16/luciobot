@@ -1,0 +1,15 @@
+---
+image: alpine/edge
+packages:
+  - nodejs
+  - npm
+  - python2
+sources:
+  - "https://github.com/LucioB16/luciobot"
+tasks:
+  - setup: |
+      cd luciobot
+      npm install
+  - test: |
+      cd luciobot
+      npm test
