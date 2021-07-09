@@ -295,6 +295,12 @@ client.on(Events.MESSAGE_CREATE, async (message: Message) => {
       const commandName: string = message.body.split(`${prefix}`)[1].split(' ')[0];
       if (whatsappClient.loadedCommands.has(commandName)) {
         const commandArgs: string = message.body.substr(prefix.length + 1 + commandName.length)
+
+        if (message.hasQuotedMsg) {
+          let quotedMessage = await message.getQuotedMessage();
+          message.from = quotedMessage.from
+        }
+
         await runCommand(message, whatsappClient.loadedCommands.get(commandName) ?? defaultCommand, parseArgs(commandArgs))
       } else {
         await message.reply(`The command *${commandName}* doesn't exist`, message.from)
