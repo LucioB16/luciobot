@@ -1,6 +1,6 @@
 'use strict'
 
-import {Client, Message, Events} from "whatsapp-web.js";
+import {Client, Message, Events, ClientOptions} from "whatsapp-web.js";
 import * as qrcode from 'qrcode-terminal'
 import * as dotenv from 'dotenv'
 import * as fs from 'fs'
@@ -15,19 +15,24 @@ type ClientWrapper = {
   [key: string]: any
 }
 
+
+const clientOptions: ClientOptions = {
+  puppeteer : {headless: true}
+}
+
+const chromePath = process.env.CHROME_PATH ?? '';
+
+if(chromePath !== ''){
+  clientOptions.puppeteer['executablePath'] = chromePath
+}
+
 const sessionString = process.env.WA_SESSION ?? '';
 
-let client: Client;
-
-if (sessionString === '') {
-  client = new Client({
-    puppeteer: {headless: true},
-  });
-} else {
-  client = new Client({
-    session: JSON.parse(sessionString),
-  });
+if (sessionString !== '') {
+  clientOptions.session = JSON.parse(sessionString);
 }
+
+const client = new Client(clientOptions);
 
 const whatsappClient: ClientWrapper = {
   loadedCommands: new Map<string, Command>(),
