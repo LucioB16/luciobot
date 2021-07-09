@@ -1,7 +1,6 @@
-import {Client, Message, MessageMedia, MessageSendOptions} from 'whatsapp-web.js'
+import {Client, Message, MessageMedia, MessageSendOptions, MessageTypes} from 'whatsapp-web.js'
 import {Command} from "../luciobot";
 import * as log from "../lib/log";
-import punycode from 'punycode'
 
 export const name = 'sticker'
 export const commands: Command[] = [
@@ -44,10 +43,18 @@ export const commands: Command[] = [
         let media: MessageMedia;
 
         if(message.hasMedia){
+          if(message.type !== MessageTypes.IMAGE){
+            return await message.reply("Can't convert anything other than images to stickers.")
+          }
           media = await message.downloadMedia();
         }
         else if (message.hasQuotedMsg) {
           let quotedMessage = await message.getQuotedMessage();
+
+          if(quotedMessage.type !== MessageTypes.IMAGE){
+            return await message.reply("Can't convert anything other than images to stickers.")
+          }
+
           if(quotedMessage.hasMedia){
             media = await quotedMessage.downloadMedia();
           }

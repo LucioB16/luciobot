@@ -46,7 +46,8 @@
     "unit": "gulp unit",
     "style": "gulp style",
     "fix": "standard --fix",
-    "start": "tsc && node build/luciobot.js",
+    "start": "node build/luciobot.js",
+    "postinstall": "tsc",
     "dev:debug": "nodemon --inspect luciobot.ts"
   },
   "repository": {
@@ -62,5 +63,6 @@
   "homepage": "https://github.com/LucioB16/luciobot#readme",
   "optionalDependencies": {
     "bufferutil": "^4.0.3"
-  }
+  },
+  "engines": { "node": "14.17.3" }
 }
