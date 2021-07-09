@@ -42,12 +42,8 @@
     "webpack": "^5.44.0"
   },
   "scripts": {
-    "test": "gulp",
-    "unit": "gulp unit",
-    "style": "gulp style",
-    "fix": "standard --fix",
+    "build": "tsc --build tsconfig.json",
     "start": "node build/luciobot.js",
-    "postinstall": "tsc",
     "dev:debug": "nodemon --inspect luciobot.ts"
   },
   "repository": {

@@ -1,1 +1,1 @@
-worker: node build/luciobot.js
+worker: npm start
