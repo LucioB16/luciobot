@@ -202,6 +202,8 @@ const runCommand = async (message: Message, command: Command, args: string[]) =>
       new Date(message.createdTimestamp + command.cooldown * 1000))
   }
    */
+  await log.info(`Chat: ${message.from} - Author: ${message.author} - Content: ${message.body}`)
+
   if (args.length > command.maxArgs) {
     return message.reply(
       `Too many arguments for \`${command.name}\`. (max: ${command.maxArgs}, `
@@ -265,7 +267,6 @@ const defaultCommand: Command = {
 }
 
 client.on(Events.MESSAGE_RECEIVED, async (message: Message) => {
-  await log.info(`Chat: ${message.from} - Author: ${message.author} - Content: ${message.body}`)
   if (!whatsappClient.prefixes.has(message.from)) {
     whatsappClient.prefixes.set(message.from, '!')
   }
@@ -273,7 +274,7 @@ client.on(Events.MESSAGE_RECEIVED, async (message: Message) => {
   // const prefix: string = whatsappClient.prefixes.get(message.from) ?? '';
   const prefix = '!'
   if (message.body.startsWith(`${prefix}`)) {
-    const commandName: string = message.body.split(prefix)[1].split(' ')[0]
+    const commandName: string = message.body.split(prefix)[1].split(' ')[0].toLowerCase()
     if (whatsappClient.loadedCommands.has(commandName)) {
       const commandArgs: string = message.body.substr(prefix.length + 1 + commandName.length)
       await runCommand(message, whatsappClient.loadedCommands.get(commandName) ?? defaultCommand, parseArgs(commandArgs))
@@ -284,7 +285,6 @@ client.on(Events.MESSAGE_RECEIVED, async (message: Message) => {
 })
 
 client.on(Events.MESSAGE_CREATE, async (message: Message) => {
-  await log.info(`Chat: ${message.from} - Author: ${message.author} - Content: ${message.body}`)
   if (!whatsappClient.prefixes.has(message.from)) {
     whatsappClient.prefixes.set(message.from, '!')
   }
@@ -293,7 +293,7 @@ client.on(Events.MESSAGE_CREATE, async (message: Message) => {
   const prefix = '!'
   if (message.author === ownerId || message.from === ownerId) {
     if (message.body.startsWith(`${prefix}`)) {
-      const commandName: string = message.body.split(`${prefix}`)[1].split(' ')[0]
+      const commandName: string = message.body.split(`${prefix}`)[1].split(' ')[0].toLowerCase()
       if (whatsappClient.loadedCommands.has(commandName)) {
         const commandArgs: string = message.body.substr(prefix.length + 1 + commandName.length)
         /*
