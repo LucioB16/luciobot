@@ -41,8 +41,24 @@ export const commands: Command[] = [
 ]
 
 const genCarbon = async (text: string, language: string) => {
-  const url = `https://carbonnowsh.herokuapp.com/?language=${language}&code=${encodeURIComponent(text)}`
-  const response = await axios.get(url, { responseType: 'arraybuffer' })
+  const url = "https://carbonnowsh.herokuapp.com/"
+  const body = {
+    code: escapeJson(text),
+    language: language
+  }
+
+  const response = await axios.post(url, body, { responseType: 'arraybuffer' })
   const base64Data = Buffer.from(response.data, 'binary').toString('base64')
   return (base64Data)
+}
+
+function escapeJson(value: string): string {
+  return  value.replace(/\\n/g, "\\n")
+    .replace(/\\'/g, "\\'")
+    .replace(/\\"/g, '\\"')
+    .replace(/\\&/g, "\\&")
+    .replace(/\\r/g, "\\r")
+    .replace(/\\t/g, "\\t")
+    .replace(/\\b/g, "\\b")
+    .replace(/\\f/g, "\\f");
 }

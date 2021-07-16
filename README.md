@@ -1,2 +1,2 @@
 # LucioBot
-Bot para WhatsApp en Next.js
+WhatsApp bot made with whatsapp-web.js
