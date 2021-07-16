@@ -213,7 +213,7 @@ const runCommand = async (message: Message, command: Command, args: string[]) =>
     return message.reply(`Too few arguments for \`${command.name}\`. (min: ${command.minArgs})`, message.from)
   }
   try {
-    if (command.adminOnly && ownerId !== message.author) {
+    if (command.adminOnly && ownerId !== message.author && ownerId !== message.from) {
       return message.reply(`You don't have permission to execute this command, which requires ownership of this bot.`, message.from)
     }
     return await command.run(message, client, args)
@@ -296,12 +296,13 @@ client.on(Events.MESSAGE_CREATE, async (message: Message) => {
       const commandName: string = message.body.split(`${prefix}`)[1].split(' ')[0].toLowerCase()
       if (whatsappClient.loadedCommands.has(commandName)) {
         const commandArgs: string = message.body.substr(prefix.length + 1 + commandName.length)
-        /*
-        if (message.hasQuotedMsg) {
-          let quotedMessage = await message.getQuotedMessage()
-          message.from = quotedMessage.from
+
+        const chat = await message.getChat()
+        const contact = await message.getContact()
+        if(chat.isGroup) {
+          message.author = contact.id.user + "@c.us"
+          message.from = chat.id.user + "@g.us"
         }
-         */
 
         await runCommand(message, whatsappClient.loadedCommands.get(commandName) ?? defaultCommand, parseArgs(commandArgs))
       } else {

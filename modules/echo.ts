@@ -9,7 +9,7 @@ export const commands: Command[] = [
     secret: false,
     description: 'Takes your input and spits it right back at you.',
     examples: ['yes'],
-    adminOnly: false,
+    adminOnly: true,
     aliases: [],
     cooldown: 0,
     minArgs: 1,
