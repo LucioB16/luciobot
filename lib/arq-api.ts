@@ -2,6 +2,7 @@
 
 import axios, { AxiosRequestConfig } from 'axios'
 import { YtResponse } from 'youtube-dl-exec'
+import {MessageMedia} from "whatsapp-web.js";
 
 const youtubedl = require('youtube-dl-exec')
 
@@ -106,4 +107,25 @@ export async function downloadYoutubeVideo(id: string) : Promise<YtVideoResult> 
   }
 
   return result
+}
+
+export type ArqImageResult = {
+  ok?: boolean,
+  result?: ({ title: string, url: string })[]
+  detail?: ({ loc: string[], msg: string, type: string })[]
+}
+
+export const getImage = async (query: string): Promise<ArqImageResult> => {
+  const config: AxiosRequestConfig = {
+    headers: {
+      'X-API-KEY': process.env.ARQ_API_KEY ?? ''
+    }
+  }
+
+  try {
+    const response = await axios.get<ArqImageResult>(`https://thearq.tech/image?query=${query}`, config)
+    return response.data
+  } catch (e) {
+    return { ok: false, result: [] }
+  }
 }
