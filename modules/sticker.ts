@@ -7,13 +7,17 @@ export const commands: Command[] = [
   {
     name: 'sticker',
     secret: false,
-    description: 'Takes your image/video and makes a sticker out of it.',
-    examples: ['yes'],
+    description: 'Takes your image/video and makes a sticker out of it.\n' +
+      'You have to reply a message that contains an image or send an image with its caption containing the command\n\n' +
+      'First argument (optional): sticker name\nSecond Argument: sticker author\n' +
+      'Third argument (optional): emojis used to search the sticker (comma separated)',
+    examples: ['sticker amogus imposter 👨‍🚀,🚀,🔴'],
     adminOnly: false,
     aliases: [],
     cooldown: 0,
     minArgs: 0,
     maxArgs: 3,
+    signature: 'sticker <sticker_name (optional)> <sticker_author (optional)> <emojis (optional)>',
     run: async (message: Message, client: Client, args: string[]) => {
       const messageOptions: MessageSendOptions = { sendMediaAsSticker: true }
       switch (args.length) {

@@ -11,13 +11,14 @@ export const commands: Command[] = [
   {
     name: 'image',
     secret: false,
-    description: 'Search and download mp3 youtube',
-    examples: ['yes'],
+    description: 'Searches and gets random image',
+    examples: ['image amogus'],
     adminOnly: false,
     aliases: ['imagen', 'foto','photo'],
     cooldown: 0,
     minArgs: 1,
     maxArgs: Infinity,
+    signature: 'image <query>',
     run: async (message: Message, client: Client, args: string[]) => {
       const query = args.join(" ");
       try {

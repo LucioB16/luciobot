@@ -8,12 +8,13 @@ export const commands: Command[] = [
     name: 'echo',
     secret: false,
     description: 'Takes your input and spits it right back at you.',
-    examples: ['yes'],
+    examples: ['echo hello'],
     adminOnly: true,
     aliases: [],
     cooldown: 0,
     minArgs: 1,
     maxArgs: Infinity,
+    signature: 'echo <input>',
     run: async (message: Message, client: Client, args: string[]) => {
       let out = args.join(' ')
       try {

@@ -8,13 +8,16 @@ export const commands: Command[] = [
   {
     name: 'code',
     secret: false,
-    description: 'Takes some code and makes an image with carbon.now.sh.',
-    examples: ['yes'],
+    description: 'Takes some code and makes an image with carbon.now.sh.\n' +
+      'First argument: language (you can use auto for automatic syntax)\n' +
+      'The rest of the text is used as input',
+    examples: ['code javascript console.log("Hello World!")'],
     adminOnly: false,
     aliases: [],
     cooldown: 0,
     minArgs: 1,
     maxArgs: Infinity,
+    signature: 'code <language> <input_text>',
     run: async (message: Message, client: Client, args: string[]) => {
       let language = args[0]
       let inputText: string

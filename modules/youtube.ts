@@ -10,13 +10,16 @@ export const commands: Command[] = [
   {
     name: 'youtubeaudio',
     secret: false,
-    description: 'Search and download mp3 youtube',
-    examples: ['yes'],
+    description: 'Search and download mp3 youtube\n' +
+      'You can send a query or the link to the YouTube video you want to download the audio',
+    examples: ['youtubeaudio https://www.youtube.com/watch?v=ZKuDJQqy6ak',
+      'youtubeaudio when the imposter is sus'],
     adminOnly: false,
     aliases: ['music', 'audio'],
     cooldown: 0,
     minArgs: 1,
     maxArgs: Infinity,
+    signature: 'youtubeaudio <query>',
     run: async (message: Message, client: Client, args: string[]) => {
       const query = args.join(" ");
       try {
@@ -54,13 +57,16 @@ export const commands: Command[] = [
   {
     name: 'youtubevideo',
     secret: false,
-    description: 'Search and download mp3 youtube',
-    examples: ['yes'],
+    description: 'Search and download youtube video\n' +
+      'You can send a query or the link to the YouTube video you want to download',
+    examples: ['youtubevideo https://www.youtube.com/watch?v=ZKuDJQqy6ak',
+      'youtubevideo when the imposter is sus'],
     adminOnly: false,
     aliases: ['video', 'vid'],
     cooldown: 0,
     minArgs: 1,
     maxArgs: Infinity,
+    signature: 'youtubevideo <query>',
     run: async (message: Message, client: Client, args: string[]) => {
       const query = args.join(" ");
       try {

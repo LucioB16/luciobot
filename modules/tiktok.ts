@@ -11,13 +11,15 @@ export const commands: Command[] = [
   {
     name: 'tiktok',
     secret: false,
-    description: 'Download TikTok videos.',
-    examples: ['yes'],
+    description: 'Download TikTok videos.\n' +
+      '1 argument: tiktok video URL',
+    examples: ['tiktok https://www.tiktok.com/@amongus/video/6970027065793875206'],
     adminOnly: false,
     aliases: [],
     cooldown: 0,
     minArgs: 1,
     maxArgs: 1,
+    signature: 'tiktok <tiktok_url>',
     run: async (message: Message, client: Client, args: string[]) => {
       const tmpDir = tmp.dirSync()
 
