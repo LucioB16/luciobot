@@ -36,7 +36,7 @@ if (sessionString !== '') {
 
 const client = new Client(clientOptions)
 
-const whatsappClient: ClientWrapper = {
+export const whatsappClient: ClientWrapper = {
   loadedCommands: new Map<string, Command>(),
   loadedModules: new Map<string, Module>(),
   prefixes: new Map<string, string>() // TODO: get from DB
@@ -72,6 +72,7 @@ export type Command = {
   secret?: boolean,
   cooldown?: number,
   aliases?: string[],
+  signature: string,
   run (message: Message, client: Client, args: string[]): Promise<Message | undefined>
 }
 
@@ -252,6 +253,7 @@ const defaultCommand: Command = {
   adminOnly: false,
   minArgs: 1,
   maxArgs: Infinity,
+  signature: 'DefaultCommand',
   run: async (message: Message, client: Client, args: string[]) => {
     let out = args.join(' ')
     try {
@@ -271,6 +273,7 @@ client.on(Events.MESSAGE_RECEIVED, async (message: Message) => {
     whatsappClient.prefixes.set(message.from, '!')
   }
 
+  // TODO: get prefix
   // const prefix: string = whatsappClient.prefixes.get(message.from) ?? '';
   const prefix = '!'
   if (message.body.startsWith(`${prefix}`)) {
