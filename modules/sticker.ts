@@ -70,6 +70,7 @@ export const commands: Command[] = [
 
         return await message.reply(media, message.from, messageOptions)
       } catch (e) {
+        await message.reply("Couldn't generate sticker")
         return await log.error(JSON.stringify(e), client)
       }
     }

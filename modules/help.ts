@@ -10,7 +10,7 @@ export const commands: Command[] = [
     description: 'Returns the description and example of every command available',
     examples: ['help', 'help image'],
     adminOnly: false,
-    aliases: [],
+    aliases: ['ayuda'],
     cooldown: 0,
     minArgs: 0,
     maxArgs: 1,
