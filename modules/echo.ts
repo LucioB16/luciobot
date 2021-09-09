@@ -6,7 +6,7 @@ export const name = 'echo'
 export const commands: Command[] = [
   {
     name: 'echo',
-    secret: false,
+    secret: true,
     description: 'Takes your input and spits it right back at you.',
     examples: ['echo hello'],
     adminOnly: true,

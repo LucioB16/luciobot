@@ -1,10 +1,11 @@
 'use strict'
 
-import { Client, Message, Events, ClientOptions } from 'whatsapp-web.js'
+import {Client, ClientOptions, Events, GroupNotification, Message} from 'whatsapp-web.js'
 import * as qrcode from 'qrcode-terminal'
 import * as dotenv from 'dotenv'
 import * as fs from 'fs'
 import * as log from './lib/log'
+import {mockMessage} from "./lib/mock-wa";
 
 dotenv.config()
 
@@ -25,7 +26,9 @@ const clientOptions: ClientOptions = {
 const chromePath = process.env.CHROME_PATH ?? ''
 
 if (chromePath !== '') {
-  clientOptions.puppeteer['executablePath'] = chromePath
+  if (clientOptions.puppeteer) {
+    clientOptions.puppeteer['executablePath'] = chromePath
+  }
 }
 
 const sessionString = process.env.WA_SESSION ?? ''
@@ -73,7 +76,7 @@ export type Command = {
   cooldown?: number,
   aliases?: string[],
   signature: string,
-  run (message: Message, client: Client, args: string[]): Promise<Message | undefined>
+  run (message: Message, client: Client, args: string[], groupNotification?: GroupNotification): Promise<Message | undefined>
 }
 
 export type Event = {
@@ -189,7 +192,7 @@ const parseArgs = (messageContent: string): string[] => {
   return messageContent.split(' ')
 }
 
-const runCommand = async (message: Message, command: Command, args: string[]) => {
+const runCommand = async (message: Message, command: Command, args: string[], groupNotification?: GroupNotification) => {
   /*if (command.cooldown != null) {
     await client['userData'].ensure(`${message.author.id}.cooldowns.${command.name}`, new Date(0))
     const cooldownExpiryDate = new Date(client['userData']
@@ -203,7 +206,9 @@ const runCommand = async (message: Message, command: Command, args: string[]) =>
       new Date(message.createdTimestamp + command.cooldown * 1000))
   }
    */
-  await log.info(`Chat: ${message.from} - Author: ${message.author} - Content: ${message.body}`)
+  if(message !== mockMessage){
+    await log.info(`Chat: ${message.from} - Author: ${message.author} - Content: ${message.body}`)
+  }
 
   if (args.length > command.maxArgs) {
     return message.reply(
@@ -217,7 +222,7 @@ const runCommand = async (message: Message, command: Command, args: string[]) =>
     if (command.adminOnly && ownerId !== message.author && ownerId !== message.from) {
       return message.reply(`You don't have permission to execute this command, which requires ownership of this bot.`, message.from)
     }
-    return await command.run(message, client, args)
+    return await command.run(message, client, args, groupNotification)
   } catch (e) {
     await message.reply(`Error: \`${e}\``, message.from)
     return log.warn(`\`${command.name} ${args}\` errored with \`${e}\``, client)
@@ -269,6 +274,7 @@ const defaultCommand: Command = {
 }
 
 client.on(Events.MESSAGE_RECEIVED, async (message: Message) => {
+  //console.log(message)
   if (!whatsappClient.prefixes.has(message.from)) {
     whatsappClient.prefixes.set(message.from, '!')
   }
@@ -327,6 +333,18 @@ client.on(Events.BATTERY_CHANGED, (batteryInfo) => {
   if (batteryInfo.battery < 15 && !batteryInfo.plugged) {
     log.warn(`Low battery level: ${batteryInfo.battery}%`)
   }
+})
+
+client.on(Events.GROUP_JOIN, async (notification) => {
+  await runCommand(mockMessage, whatsappClient.loadedCommands.get("user-joined") ?? defaultCommand, [], notification)
+})
+
+client.on(Events.GROUP_LEAVE, async (notification) => {
+  await runCommand(mockMessage, whatsappClient.loadedCommands.get("user-leave") ?? defaultCommand, [], notification)
+})
+
+client.on(Events.GROUP_UPDATE, async (notification) => {
+  await runCommand(mockMessage, whatsappClient.loadedCommands.get("group-update") ?? defaultCommand, [], notification)
 })
 
 client.initialize()
