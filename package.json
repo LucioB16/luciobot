@@ -22,7 +22,7 @@
     "qrcode-terminal": "^0.12.0",
     "tiktok-scraper": "^1.4.33",
     "tmp": "^0.0.33",
-    "whatsapp-web.js": "^1.14.1",
+    "whatsapp-web.js": "github:pedroslopez/whatsapp-web.js#fix-types-pup-args",
     "youtube-dl-exec": "^1.2.4"
   },
   "devDependencies": {
