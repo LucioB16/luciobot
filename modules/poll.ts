@@ -30,8 +30,8 @@ export const commands: Command[] = [
         // let msg = await client.sendMessage(message.from, buttons)
         // console.log(msg)
 
-        let sections = [{title:'sectionTitle',rows:[{id: 'AAAAAAAAAA', title:'ListItem1', description: 'desc'},{title:'ListItem2'}]}];
-        let list = new List('List body','btnText',sections,'Title','footer');
+        let sections = [{title:'Encuesta',rows:[{id: '1', title:'Si', description: 'Descripción'},{id: '2', title:'No', description: 'Descripción'}]}];
+        let list = new List('Si o no?','Elegí una opción',sections,'Encuesta','footer');
         let msj = client.sendMessage(message.from, list);
         console.log(msj)
 
