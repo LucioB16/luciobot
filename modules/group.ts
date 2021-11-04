@@ -3,7 +3,6 @@ import {
   GroupChat,
   GroupNotification,
   GroupNotificationTypes,
-  InviteV4Data,
   Message,
   MessageMedia
 } from 'whatsapp-web.js'
@@ -186,7 +185,7 @@ export const commands: Command[] = [
   },
   {
     name: 'join',
-    secret: false,
+    secret: true,
     description: 'Bot joins group specified by parameter',
     examples: ['join https://chat.whatsapp.com/xxxxxxxxxxxxxxxxx'],
     adminOnly: false,

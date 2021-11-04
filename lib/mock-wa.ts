@@ -4,13 +4,16 @@ import WAWebJS, {
   Message,
   MessageMedia,
   MessageTypes,
-  Order,
+  Order, Payment,
   Product,
   ProductMetadata
-} from "whatsapp-web.js";
+} from 'whatsapp-web.js'
 
 export const mockMessage: Message =
   {
+    getPayment(): WAWebJS.Payment {
+      return mockPayment;
+    },
     acceptGroupV4Invite(): Promise<{ status: number }> {
       return Promise.resolve({status: 0});
     },
@@ -110,7 +113,7 @@ export const mockChat: Chat =
     markUnread(): Promise<void> {
       return Promise.resolve(undefined);
     },
-    mute(unmuteDate: Date): Promise<void> {
+    mute(unmuteDate?: Date | undefined): Promise<void> {
       return Promise.resolve(undefined);
     },
     muteExpiration: 0,
@@ -153,6 +156,11 @@ export const mockChat: Chat =
 
 export const mockContact: Contact =
   {
+    getCountryCode(): Promise<string> {
+      return Promise.resolve('');
+    }, getFormattedNumber(): Promise<string> {
+      return Promise.resolve('');
+    },
     block(): Promise<boolean> {
       return Promise.resolve(false);
     }, getAbout(): Promise<string | null> {
@@ -218,4 +226,17 @@ export const mockProductMetadata: ProductMetadata =
     description: "",
     name: "",
     id: ""
+  }
+
+export const mockPayment: Payment =
+  {
+    id: { },
+    paymentAmount1000: 0,
+    paymentCurrency: '',
+    paymentMessageReceiverJid: { },
+    paymentNote: '',
+    paymentStatus: 0,
+    paymentTransactionTimestamp: 0,
+    paymentTxnStatus: 0
+
   }
