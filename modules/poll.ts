@@ -1,4 +1,4 @@
-import { Client, Message, Buttons } from 'whatsapp-web.js'
+import { Client, Message, Buttons, List } from 'whatsapp-web.js'
 import { Command } from '../luciobot'
 import * as log from '../lib/log'
 
@@ -7,7 +7,7 @@ export const commands: Command[] = [
   {
     name: 'poll',
     secret: false,
-    description: 'Notifies every active chat the specified event',
+    description: 'Makes a poll',
     examples: ['poll 3'],
     adminOnly: false,
     aliases: [],
@@ -19,15 +19,23 @@ export const commands: Command[] = [
       const number = Number(args.join(" "))
 
       try {
-        let buttonArray = []
+        // let buttonArray = []
+        //
+        // for (let i = 1; i <= number; i++) {
+        //   let button = ["body", `Boton ${i}`, "aaaaaaa"]
+        //   buttonArray.push(button)
+        // }
+        //
+        // const buttons = new Buttons('*Seleccione una opción:*', buttonArray , 'Título', 'Pie')
+        // let msg = await client.sendMessage(message.from, buttons)
+        // console.log(msg)
 
-        for (let i = 1; i <= number; i++) {
-          let button = ["body", `Boton ${i}`]
-          buttonArray.push(button)
-        }
+        let sections = [{title:'sectionTitle',rows:[{id: 'AAAAAAAAAA', title:'ListItem1', description: 'desc'},{title:'ListItem2'}]}];
+        let list = new List('List body','btnText',sections,'Title','footer');
+        let msj = client.sendMessage(message.from, list);
+        console.log(msj)
 
-        const buttons = new Buttons('*Seleccione una opción:*', buttonArray , 'Título', 'Pie')
-        return await client.sendMessage(message.from, buttons)
+        return msj;
       } catch (e) {
         return await log.error(JSON.stringify(e), client)
       }

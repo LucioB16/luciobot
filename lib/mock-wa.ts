@@ -113,7 +113,7 @@ export const mockChat: Chat =
     markUnread(): Promise<void> {
       return Promise.resolve(undefined);
     },
-    mute(unmuteDate: Date): Promise<void> {
+    mute(unmuteDate?: Date | undefined): Promise<void> {
       return Promise.resolve(undefined);
     },
     muteExpiration: 0,
@@ -156,6 +156,11 @@ export const mockChat: Chat =
 
 export const mockContact: Contact =
   {
+    getCountryCode(): Promise<string> {
+      return Promise.resolve('');
+    }, getFormattedNumber(): Promise<string> {
+      return Promise.resolve('');
+    },
     block(): Promise<boolean> {
       return Promise.resolve(false);
     }, getAbout(): Promise<string | null> {

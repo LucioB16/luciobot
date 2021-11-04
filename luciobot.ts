@@ -18,7 +18,7 @@ type ClientWrapper = {
 
 const clientOptions: ClientOptions = {
   puppeteer: {
-    headless: true,
+    headless: false,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   }
 }
@@ -293,7 +293,7 @@ client.on(Events.MESSAGE_RECEIVED, async (message: Message) => {
   }
 })
 
-/*client.on(Events.MESSAGE_CREATE, async (message: Message) => {
+client.on(Events.MESSAGE_CREATE, async (message: Message) => {
   if (!whatsappClient.prefixes.has(message.from)) {
     whatsappClient.prefixes.set(message.from, '!')
   }
@@ -319,7 +319,7 @@ client.on(Events.MESSAGE_RECEIVED, async (message: Message) => {
       }
     }
   }
-})*/
+})
 
 client.on(Events.DISCONNECTED, (state) => {
   log.warn(`${state}`)
