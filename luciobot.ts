@@ -56,8 +56,13 @@ client.on(Events.QR_RECEIVED, (qr) => {
 })
 
 client.on(Events.AUTHENTICATED, (session) => {
-  log.info('Copy the value below without line breaks and set it to WA_SESSION environment variable.\n' +
-    `'${JSON.stringify(session)}'`)
+  if (session === undefined) {
+    log.info('Auth successful')
+  }
+  else {
+    log.info('Copy the value below without line breaks and set it to WA_SESSION environment variable.\n' +
+      `'${JSON.stringify(session)}'`)
+  }
 })
 
 client.on(Events.AUTHENTICATION_FAILURE, (message) => {
@@ -292,33 +297,33 @@ client.on(Events.MESSAGE_RECEIVED, async (message: Message) => {
   }
 })
 
-client.on(Events.MESSAGE_CREATE, async (message: Message) => {
-  if (!whatsappClient.prefixes.has(message.from)) {
-    whatsappClient.prefixes.set(message.from, '!')
-  }
-
-  // const prefix: string = 'test' + whatsappClient.prefixes.get(message.from) ?? '';
-  const prefix = '!'
-  if (message.author === ownerId || message.from === ownerId) {
-    if (message.body.startsWith(`${prefix}`)) {
-      const commandName: string = message.body.split(`${prefix}`)[1].split(' ')[0].toLowerCase()
-      if (whatsappClient.loadedCommands.has(commandName)) {
-        const commandArgs: string = message.body.substr(prefix.length + 1 + commandName.length)
-
-        const chat = await message.getChat()
-        const contact = await message.getContact()
-        if(chat.isGroup) {
-          message.author = contact.id.user + "@c.us"
-          message.from = chat.id.user + "@g.us"
-        }
-
-        await runCommand(message, whatsappClient.loadedCommands.get(commandName) ?? defaultCommand, parseArgs(commandArgs))
-      } else {
-        await message.reply(`The command *${commandName}* doesn't exist`, message.from)
-      }
-    }
-  }
-})
+// client.on(Events.MESSAGE_CREATE, async (message: Message) => {
+//   if (!whatsappClient.prefixes.has(message.from)) {
+//     whatsappClient.prefixes.set(message.from, '!')
+//   }
+//
+//   // const prefix: string = 'test' + whatsappClient.prefixes.get(message.from) ?? '';
+//   const prefix = '!'
+//   if (message.author === ownerId || message.from === ownerId) {
+//     if (message.body.startsWith(`${prefix}`)) {
+//       const commandName: string = message.body.split(`${prefix}`)[1].split(' ')[0].toLowerCase()
+//       if (whatsappClient.loadedCommands.has(commandName)) {
+//         const commandArgs: string = message.body.substr(prefix.length + 1 + commandName.length)
+//
+//         const chat = await message.getChat()
+//         const contact = await message.getContact()
+//         if(chat.isGroup) {
+//           message.author = contact.id.user + "@c.us"
+//           message.from = chat.id.user + "@g.us"
+//         }
+//
+//         await runCommand(message, whatsappClient.loadedCommands.get(commandName) ?? defaultCommand, parseArgs(commandArgs))
+//       } else {
+//         await message.reply(`The command *${commandName}* doesn't exist`, message.from)
+//       }
+//     }
+//   }
+// })
 
 client.on(Events.DISCONNECTED, (state) => {
   log.warn(`${state}`)
