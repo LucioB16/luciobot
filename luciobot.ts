@@ -1,6 +1,6 @@
 'use strict'
 
-import {Client, ClientOptions, Events, GroupNotification, Message} from 'whatsapp-web.js'
+import { Client, ClientOptions, Events, GroupNotification, LocalAuth, Message } from 'whatsapp-web.js'
 import * as qrcode from 'qrcode-terminal'
 import * as dotenv from 'dotenv'
 import * as fs from 'fs'
@@ -20,7 +20,8 @@ const clientOptions: ClientOptions = {
   puppeteer: {
     headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
-  }
+  },
+  authStrategy: new LocalAuth()
 }
 
 const chromePath = process.env.CHROME_PATH ?? ''
@@ -29,12 +30,6 @@ if (chromePath !== '') {
   if (clientOptions.puppeteer) {
     clientOptions.puppeteer['executablePath'] = chromePath
   }
-}
-
-const sessionString = process.env.WA_SESSION ?? ''
-
-if (sessionString !== '') {
-  clientOptions.session = JSON.parse(sessionString)
 }
 
 const client = new Client(clientOptions)
@@ -61,8 +56,17 @@ client.on(Events.QR_RECEIVED, (qr) => {
 })
 
 client.on(Events.AUTHENTICATED, (session) => {
-  log.info('Copy the value below without line breaks and set it to WA_SESSION environment variable.\n' +
-    `'${JSON.stringify(session)}'`)
+  if (session === undefined) {
+    log.info('Auth successful')
+  }
+  else {
+    log.info('Copy the value below without line breaks and set it to WA_SESSION environment variable.\n' +
+      `'${JSON.stringify(session)}'`)
+  }
+})
+
+client.on(Events.AUTHENTICATION_FAILURE, (message) => {
+  log.error(`Auth failure: ${message}`)
 })
 
 export type Command = {
@@ -263,7 +267,7 @@ const defaultCommand: Command = {
     let out = args.join(' ')
     try {
       return await message.reply(out)
-    } catch (e) {
+    } catch (e: any) {
       if (e.message === 'Cannot send an empty message') {
         return message.reply('\u200e')
       } else {
@@ -293,33 +297,33 @@ client.on(Events.MESSAGE_RECEIVED, async (message: Message) => {
   }
 })
 
-client.on(Events.MESSAGE_CREATE, async (message: Message) => {
-  if (!whatsappClient.prefixes.has(message.from)) {
-    whatsappClient.prefixes.set(message.from, '!')
-  }
-
-  // const prefix: string = 'test' + whatsappClient.prefixes.get(message.from) ?? '';
-  const prefix = '!'
-  if (message.author === ownerId || message.from === ownerId) {
-    if (message.body.startsWith(`${prefix}`)) {
-      const commandName: string = message.body.split(`${prefix}`)[1].split(' ')[0].toLowerCase()
-      if (whatsappClient.loadedCommands.has(commandName)) {
-        const commandArgs: string = message.body.substr(prefix.length + 1 + commandName.length)
-
-        const chat = await message.getChat()
-        const contact = await message.getContact()
-        if(chat.isGroup) {
-          message.author = contact.id.user + "@c.us"
-          message.from = chat.id.user + "@g.us"
-        }
-
-        await runCommand(message, whatsappClient.loadedCommands.get(commandName) ?? defaultCommand, parseArgs(commandArgs))
-      } else {
-        await message.reply(`The command *${commandName}* doesn't exist`, message.from)
-      }
-    }
-  }
-})
+// client.on(Events.MESSAGE_CREATE, async (message: Message) => {
+//   if (!whatsappClient.prefixes.has(message.from)) {
+//     whatsappClient.prefixes.set(message.from, '!')
+//   }
+//
+//   // const prefix: string = 'test' + whatsappClient.prefixes.get(message.from) ?? '';
+//   const prefix = '!'
+//   if (message.author === ownerId || message.from === ownerId) {
+//     if (message.body.startsWith(`${prefix}`)) {
+//       const commandName: string = message.body.split(`${prefix}`)[1].split(' ')[0].toLowerCase()
+//       if (whatsappClient.loadedCommands.has(commandName)) {
+//         const commandArgs: string = message.body.substr(prefix.length + 1 + commandName.length)
+//
+//         const chat = await message.getChat()
+//         const contact = await message.getContact()
+//         if(chat.isGroup) {
+//           message.author = contact.id.user + "@c.us"
+//           message.from = chat.id.user + "@g.us"
+//         }
+//
+//         await runCommand(message, whatsappClient.loadedCommands.get(commandName) ?? defaultCommand, parseArgs(commandArgs))
+//       } else {
+//         await message.reply(`The command *${commandName}* doesn't exist`, message.from)
+//       }
+//     }
+//   }
+// })
 
 client.on(Events.DISCONNECTED, (state) => {
   log.warn(`${state}`)
