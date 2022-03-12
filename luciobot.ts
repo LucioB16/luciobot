@@ -252,7 +252,7 @@ client.on(Events.READY, async () => {
     }
   })
 
-  console.log(`Client is ready! Name: ${client.info.pushname} - WhatsApp ID: ${client.info.wid.user}`)
+  log.info(`Client is ready! Name: ${client.info.pushname} - WhatsApp ID: ${client.info.wid.user}`)
 })
 
 const defaultCommand: Command = {
@@ -349,6 +349,10 @@ client.on(Events.GROUP_LEAVE, async (notification) => {
 
 client.on(Events.GROUP_UPDATE, async (notification) => {
   await runCommand(mockMessage, whatsappClient.loadedCommands.get("group-update") ?? defaultCommand, [], notification)
+})
+
+client.on(Events.MESSAGE_REVOKED_EVERYONE, async (message) => {
+  await runCommand(message, whatsappClient.loadedCommands.get("message-revoked") ?? defaultCommand, [])
 })
 
 client.initialize()

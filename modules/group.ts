@@ -1,10 +1,10 @@
-import {
+import WAWebJS, {
   Client,
   GroupChat,
   GroupNotification,
   GroupNotificationTypes,
   Message,
-  MessageMedia
+  MessageMedia,
 } from 'whatsapp-web.js'
 import {Command} from '../luciobot'
 import * as log from '../lib/log'
@@ -29,7 +29,7 @@ export const commands: Command[] = [
       }
 
       try {
-        // @ts-ignore
+
         const groupId: GroupId = groupNotification.id as GroupId
         if(!groupId) {
           return await log.error("Error getting chat for group welcome", client)
@@ -82,7 +82,7 @@ export const commands: Command[] = [
       }
 
       try {
-        // @ts-ignore
+
         const groupId: GroupId = groupNotification.id as GroupId
         if(!groupId) {
           return await log.error("Error getting chat for group salute", client)
@@ -138,7 +138,7 @@ export const commands: Command[] = [
       }
 
       try {
-        // @ts-ignore
+
         const groupId: GroupId = groupNotification.id as GroupId
         if(!groupId) {
           return await log.error("Error getting chat for group salute", client)
@@ -167,8 +167,7 @@ export const commands: Command[] = [
             messageContent = "Nueva foto de grupo"
             const profilePicUrl = await client.getProfilePicUrl(chat.id._serialized)
             if(profilePicUrl) {
-              const profilePicB64 = Buffer.from((await axios.get(profilePicUrl, { responseType: 'arraybuffer' })).data).toString('base64')
-              const media = new MessageMedia('image/jpeg', profilePicB64)
+              const media = await MessageMedia.fromUrl(profilePicUrl)
               return await client.sendMessage(chat.id._serialized, media, {caption: messageContent})
             }
             else {
@@ -204,6 +203,44 @@ export const commands: Command[] = [
       } catch (e) {
         console.log(e)
         await message.reply("That invite code seems to be invalid.")
+        return await log.error(JSON.stringify(e), client)
+      }
+    }
+  },
+  {
+    name: 'message-revoked',
+    secret: true,
+    description: 'Triggered when a user revokes a message for everyone',
+    examples: ['message-revoked'],
+    adminOnly: false,
+    aliases: [],
+    cooldown: 0,
+    minArgs: 0,
+    maxArgs: 0,
+    signature: 'message-revoked',
+    run: async (message: Message, client: Client, args: string[]) => {
+      try {
+        let chat = await message.getChat() as GroupChat
+
+        if(!chat) {
+          return await log.error("Error getting chat for group welcome", client)
+        }
+
+        const contact = await client.getContactById(message.author ?? '')
+
+        if (!contact) {
+          return await log.error("Error getting contact for group welcome", client)
+        }
+
+        let messageContent = `Qué borras @${contact.number}? Te vi gil.`
+
+        let mentions = [contact]
+
+        return await client.sendMessage(chat.id._serialized, messageContent, {
+          mentions: mentions
+        })
+      } catch (e) {
+        console.log(e)
         return await log.error(JSON.stringify(e), client)
       }
     }

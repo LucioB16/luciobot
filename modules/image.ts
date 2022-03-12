@@ -29,10 +29,7 @@ export const commands: Command[] = [
           if (results.length > 0) {
             const image = results[Math.floor(Math.random() * results.length)]
 
-            const imageB64 = Buffer.from((await axios.get(image.url, { responseType: 'arraybuffer' })).data).toString('base64')
-
-            const media = new MessageMedia('image/jpeg', imageB64)
-
+            const media = await MessageMedia.fromUrl(image.url)
             return await message.reply(media, message.from, { caption: image.title })
           }
         }
