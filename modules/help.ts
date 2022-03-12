@@ -74,7 +74,7 @@ export const commands: Command[] = [
 
           return await message.reply(outMessage)
         }
-      } catch (e) {
+      } catch (e: any) {
         return log.error(e, client)
       }
     }

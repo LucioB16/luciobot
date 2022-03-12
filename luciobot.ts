@@ -1,6 +1,6 @@
 'use strict'
 
-import {Client, ClientOptions, Events, GroupNotification, Message} from 'whatsapp-web.js'
+import { Client, ClientOptions, Events, GroupNotification, LocalAuth, Message } from 'whatsapp-web.js'
 import * as qrcode from 'qrcode-terminal'
 import * as dotenv from 'dotenv'
 import * as fs from 'fs'
@@ -20,7 +20,8 @@ const clientOptions: ClientOptions = {
   puppeteer: {
     headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
-  }
+  },
+  authStrategy: new LocalAuth()
 }
 
 const chromePath = process.env.CHROME_PATH ?? ''
@@ -29,12 +30,6 @@ if (chromePath !== '') {
   if (clientOptions.puppeteer) {
     clientOptions.puppeteer['executablePath'] = chromePath
   }
-}
-
-const sessionString = process.env.WA_SESSION ?? ''
-
-if (sessionString !== '') {
-  clientOptions.session = JSON.parse(sessionString)
 }
 
 const client = new Client(clientOptions)
@@ -63,6 +58,10 @@ client.on(Events.QR_RECEIVED, (qr) => {
 client.on(Events.AUTHENTICATED, (session) => {
   log.info('Copy the value below without line breaks and set it to WA_SESSION environment variable.\n' +
     `'${JSON.stringify(session)}'`)
+})
+
+client.on(Events.AUTHENTICATION_FAILURE, (message) => {
+  log.error(`Auth failure: ${message}`)
 })
 
 export type Command = {
@@ -263,7 +262,7 @@ const defaultCommand: Command = {
     let out = args.join(' ')
     try {
       return await message.reply(out)
-    } catch (e) {
+    } catch (e: any) {
       if (e.message === 'Cannot send an empty message') {
         return message.reply('\u200e')
       } else {

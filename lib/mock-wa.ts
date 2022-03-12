@@ -11,8 +11,15 @@ import WAWebJS, {
 
 export const mockMessage: Message =
   {
-    getPayment(): WAWebJS.Payment {
-      return mockPayment;
+    duration: '',
+    isEphemeral: false,
+    isGif: false,
+    rawData: {},
+    reload(): Promise<WAWebJS.Message> {
+      return Promise.resolve(this);
+    },
+    getPayment(): Promise<WAWebJS.Payment> {
+      return Promise.resolve(mockPayment);
     },
     acceptGroupV4Invite(): Promise<{ status: number }> {
       return Promise.resolve({status: 0});
@@ -39,8 +46,8 @@ export const mockMessage: Message =
     getMentions(): Promise<WAWebJS.Contact[]> {
       return Promise.resolve([]);
     },
-    getOrder(): WAWebJS.Order {
-      return mockOrder;
+    getOrder(): Promise<WAWebJS.Order> {
+      return Promise.resolve(mockOrder);
     },
     getQuotedMessage(): Promise<WAWebJS.Message> {
       return Promise.resolve(this);
@@ -156,6 +163,9 @@ export const mockChat: Chat =
 
 export const mockContact: Contact =
   {
+    getCommonGroups(): Promise<WAWebJS.ChatId[]> {
+      return Promise.resolve([]);
+    },
     getCountryCode(): Promise<string> {
       return Promise.resolve('');
     }, getFormattedNumber(): Promise<string> {
