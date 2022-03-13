@@ -29,9 +29,7 @@ export const commands: Command[] = [
         }
 
         const chatId = (await message.getChat()).id._serialized
-        const author = message.from
-
-        // TODO: set last message id
+        const author = message.author ?? message.from
 
         // Register poll in DB
         const poll : Prisma.PollCreateInput = {
@@ -92,6 +90,16 @@ export const commands: Command[] = [
           return await message.reply(`Contestá mi último mensaje de la encuesta ${poll!.id}\nPregunta: ${poll!.question}`)
         }
 
+        let author = message.author ?? message.from
+        if (poll!.author !== author) {
+          let contact = await client.getContactById(poll!.author)
+          return await message.reply(
+            `Solo @${contact.number} puede agregar opciones porque es el creador de la encuesta`,
+            message.from,
+            {mentions: [contact]}
+          )
+        }
+
         let optionOrder = 1;
 
         let lastOption = poll!.options[0]
@@ -123,7 +131,8 @@ export const commands: Command[] = [
 
         if (updatedPoll!.options.length > 1) {
           replyText += "\n\nO contestá este mensaje con *!publicar <horas>* para publicar la encuesta en este chat"
-          replyText += "\nEjemplo:\n!publicar 24\nEn ese caso la encuesta tendrá una duración de 24 horas, si no especificás una cantidad de hora, la encuestá durará 1 hora"
+          replyText += "\n\n*HASTA NO QUE NO SE PUBLIQUE LA ENCUESTA, NO SE PUEDE VOTAR*"
+          replyText += "\n\nEjemplo:\n!publicar 24\nEn ese caso la encuesta tendrá una duración de 24 horas, si no especificás una cantidad de hora, la encuestá durará 1 hora"
         }
 
         const newMessage = await message.reply(replyText);
@@ -194,6 +203,16 @@ export const commands: Command[] = [
 
         if (poll!.lastMessageId !== quotedMsg.id._serialized) {
           return await message.reply(`Contestá mi último mensaje de la encuesta ${poll!.id}\nPregunta: ${poll!.question}`)
+        }
+
+        let author = message.author ?? message.from
+        if (poll!.author !== author) {
+          let contact = await client.getContactById(poll!.author)
+          return await message.reply(
+            `Solo @${contact.number} puede publicar la encuesta porque es el creador`,
+            message.from,
+            {mentions: [contact]}
+            )
         }
 
         if (poll!.options.length < 2) {
