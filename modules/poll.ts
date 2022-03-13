@@ -272,7 +272,7 @@ export const commands: Command[] = [
           return await message.reply(`Error al recuperar la opción ${optionOrder}`)
         }
 
-        const voterId = message.from
+        const voterId = message.author ?? message.from
 
         let vote: Vote | null = null
 
@@ -392,7 +392,8 @@ const getResults = async (poll: dbPoll.PollWithOptions, client: Client) : Promis
     for (let vote of option.voters) {
       count += 1
       let contact = await client.getContactById(vote.voterId)
-      textVotesOption += `\n\t@${contact.number}`
+      let contactNumber = vote.voterId.split("@")[0]
+      textVotesOption += `\n\t@${contactNumber}`
       mentions.push(contact)
       totalVotes += 1
     }
