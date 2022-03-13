@@ -1,4 +1,4 @@
-import { Client, Message, MessageMedia } from 'whatsapp-web.js'
+import { Client, Message, MessageMedia, MessageTypes } from 'whatsapp-web.js'
 import { Command } from '../luciobot'
 import * as log from '../lib/log'
 import * as TikTokScraper from 'tiktok-scraper'
@@ -17,7 +17,7 @@ export const commands: Command[] = [
     adminOnly: false,
     aliases: [],
     cooldown: 0,
-    minArgs: 1,
+    minArgs: 0,
     maxArgs: 1,
     signature: 'tiktok <tiktok_url>',
     run: async (message: Message, client: Client, args: string[]) => {
@@ -37,7 +37,21 @@ export const commands: Command[] = [
         download: true
       }
 
-      const tiktokUrl = args[0]
+      let tiktokUrl = ""
+
+      if (args.length === 0) {
+        if (message.hasQuotedMsg) {
+          const quotedMessage = await message.getQuotedMessage()
+          if (message.type === MessageTypes.TEXT) {
+            tiktokUrl = quotedMessage.body
+          }
+        }
+      }
+      else {
+        tiktokUrl = args[0]
+      }
+
+      if (tiktokUrl === "") return await message.reply("Couldn't download video, please provide a valid tiktok url")
 
       try {
         const videoMeta = await TikTokScraper.getVideoMeta(tiktokUrl, options);
@@ -59,7 +73,7 @@ export const commands: Command[] = [
 
           return await message.reply(media, message.from, { caption: caption })
         }
-        await message.reply(`Couldn't download video for ${tiktokUrl}`)
+        return await message.reply(`Couldn't download video for ${tiktokUrl}`)
       } catch (e) {
         await fs.emptydir(tmpDir.name)
         tmpDir.removeCallback()
