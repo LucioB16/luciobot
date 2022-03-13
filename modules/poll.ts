@@ -222,6 +222,9 @@ export const commands: Command[] = [
 
         await dbPoll.updatePoll(poll!.id, updatePollMessageId)
 
+        const textAdvise = "Podés citar la encuesta y enviar *!resultados* para ver como van los resultados"
+        await client.sendMessage(message.from, textAdvise)
+
         return newMessage;
       } catch (e) {
         return await log.error(JSON.stringify(e), client)
