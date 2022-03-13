@@ -1,11 +1,20 @@
 'use strict'
 
-import { Client, ClientOptions, Events, GroupNotification, LocalAuth, Message } from 'whatsapp-web.js'
+import {
+  Client,
+  ClientOptions,
+  Events,
+  GroupNotification,
+  List,
+  LocalAuth,
+  Message,
+  MessageTypes
+} from 'whatsapp-web.js'
 import * as qrcode from 'qrcode-terminal'
 import * as dotenv from 'dotenv'
 import * as fs from 'fs'
 import * as log from './lib/log'
-import {mockMessage} from "./lib/mock-wa";
+import { mockMessage } from './lib/mock-wa'
 
 dotenv.config()
 
@@ -293,6 +302,63 @@ client.on(Events.MESSAGE_RECEIVED, async (message: Message) => {
       await runCommand(message, whatsappClient.loadedCommands.get(commandName) ?? defaultCommand, parseArgs(commandArgs))
     } else {
       await message.reply(`The command *${commandName}* doesn't exist`, message.from)
+    }
+  }
+  else{
+    if (message.hasQuotedMsg) {
+      const quotedMsg = await message.getQuotedMessage()
+
+      console.log(quotedMsg)
+
+      // Is answering to a poll message
+      if (quotedMsg.fromMe) {
+        // Is answering to a poll option message
+        if (quotedMsg.type === MessageTypes.TEXT && quotedMsg.body.toLowerCase().startsWith("!encuesta")) {
+          let pollIdText = quotedMsg.body.slice(
+            quotedMsg.body.indexOf('|') + 1,
+            quotedMsg.body.lastIndexOf('|'),
+          )
+
+          const pollId = Number(pollIdText);
+
+          if(isNaN(pollId)) {
+            return await message.reply(`Error al recuperar la encuesta ${pollIdText}`)
+          }
+
+          await runCommand(message, whatsappClient.loadedCommands.get("add-option") ?? defaultCommand, [pollId.toString(), quotedMsg.id._serialized, message.body])
+
+        }
+        else if (quotedMsg.type === MessageTypes.LIST) { // Is voting
+          // @ts-ignore
+          const list = quotedMsg.rawData.list as List
+
+          if (!list.title!.toLowerCase().startsWith("!encuesta"))
+          {
+            return await message.reply("Conteste a una encuesta válida")
+          }
+
+          let pollIdText = list.title!.slice(
+            list.title!.indexOf('|') + 1,
+            list.title!.lastIndexOf('|'),
+          )
+
+          const pollId = Number(pollIdText);
+
+          if(isNaN(pollId)) {
+            return await message.reply(`Error al recuperar la encuesta ${pollIdText}`)
+          }
+
+          const optionIdText = message.body.split("\n")[0]
+
+          const optionId = Number(optionIdText)
+
+          if(isNaN(optionId)) {
+            return await message.reply(`Error al recuperar la opción ${optionIdText}`)
+          }
+
+          await runCommand(message, whatsappClient.loadedCommands.get("vote") ?? defaultCommand, [optionId.toString() ,pollId.toString()])
+        }
+      }
     }
   }
 })
