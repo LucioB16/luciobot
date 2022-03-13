@@ -388,8 +388,8 @@ const getResults = async (poll: dbPoll.PollWithOptions, client: Client) : Promis
 
     for (let vote of option.voters) {
       count += 1
-      textVotesOption += `\n\t@${vote.voterId}`
       let contact = await client.getContactById(vote.voterId)
+      textVotesOption += `\n\t@${contact.number}`
       mentions.push(contact)
       totalVotes += 1
     }
@@ -403,7 +403,7 @@ const getResults = async (poll: dbPoll.PollWithOptions, client: Client) : Promis
     percentagesText += `\n• ${option.content} - ${percentage}%`
   }
 
-  text += percentagesText + "\n\n" + votersTexts
+  text += "\n\n" + percentagesText + "\n\n" + votersTexts
 
   const messageOptions: MessageSendOptions = { mentions: mentions }
 
