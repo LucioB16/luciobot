@@ -1,4 +1,4 @@
-import { Client, Message, MessageMedia } from 'whatsapp-web.js'
+import { Client, Message, MessageMedia, MessageTypes } from 'whatsapp-web.js'
 import { Command } from '../luciobot'
 import * as log from '../lib/log'
 import axios from "axios";
@@ -14,11 +14,25 @@ export const commands: Command[] = [
     adminOnly: false,
     aliases: ['tweet', 'tw'],
     cooldown: 0,
-    minArgs: 1,
+    minArgs: 0,
     maxArgs: 1,
     signature: 'twitter <tweet_url>',
     run: async (message: Message, client: Client, args: string[]) => {
-      const twitterUrl = args[0]
+      let twitterUrl = ""
+
+      if (args.length === 0) {
+        if (message.hasQuotedMsg) {
+          const quotedMessage = await message.getQuotedMessage()
+          if (message.type === MessageTypes.TEXT) {
+            twitterUrl = quotedMessage.body
+          }
+        }
+      }
+      else {
+        twitterUrl = args[0]
+      }
+
+      if (twitterUrl === "") return await message.reply("Couldn't download video, please provide a valid twitter url")
 
       try {
         const isTwitterUrl = /^https?:\/\/twitter\.com\/(?:#!\/)?(\w+)\/status(es)?\/(\d+)?\??.*/i
