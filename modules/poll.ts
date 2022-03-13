@@ -374,7 +374,7 @@ export const commands: Command[] = [
 ]
 
 const getResults = async (poll: dbPoll.PollWithOptions, client: Client) : Promise<MessageWrapper> => {
-  let text = `Resultados Encuesta:* ${poll.question}`
+  let text = `*Resultados Encuesta:* ${poll.question}`
   let votesByOptions: number[] = new Array(poll.options.length).fill(0)
   let totalVotes = 0
   let percentagesText = "*Porcentajes:*"
