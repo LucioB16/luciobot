@@ -134,6 +134,9 @@ export const commands: Command[] = [
           replyText += "\n\n*HASTA NO QUE NO SE PUBLIQUE LA ENCUESTA, NO SE PUEDE VOTAR*"
           replyText += "\n\nEjemplo:\n!publicar 24\nEn ese caso la encuesta tendrá una duración de 24 horas, si no especificás una cantidad de hora, la encuestá durará 1 hora"
         }
+        else {
+          replyText +="\n\n*LA ENCUESTA TIENE QUE TENER MINIMO 2 OPCIONES PARA FUNCIONAR*"
+        }
 
         const newMessage = await message.reply(replyText);
 
@@ -169,6 +172,14 @@ export const commands: Command[] = [
           if(isNaN(hours)) {
             return await message.reply(`Debe especificar una cantidad de horas en formato númerico`)
           }
+        }
+
+        if (hours <= 0) {
+          return await message.reply("No se aceptan números iguales o menores a cero para la cantidad de horas")
+        }
+
+        if (hours > 72) {
+          return await message.reply("No se permite una duración de encuesta de más de 72 horas")
         }
 
         const expiresAt = new Date()
@@ -337,13 +348,13 @@ export const commands: Command[] = [
     name: 'results',
     secret: false,
     description: 'Gets results from a poll',
-    examples: ['!results'],
+    examples: ['results'],
     adminOnly: false,
     aliases: ["resultados"],
     cooldown: 0,
     minArgs: 0,
     maxArgs: 0,
-    signature: '!results',
+    signature: 'results',
     run: async (message: Message, client: Client, args: string[]) => {
       try {
         if (!message.hasQuotedMsg) {

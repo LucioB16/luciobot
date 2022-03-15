@@ -308,8 +308,6 @@ client.on(Events.MESSAGE_RECEIVED, async (message: Message) => {
     if (message.hasQuotedMsg) {
       const quotedMsg = await message.getQuotedMessage()
 
-      console.log(quotedMsg)
-
       // Is answering to a poll message
       if (quotedMsg.fromMe) {
         // Is answering to a poll option message

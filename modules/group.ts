@@ -194,7 +194,11 @@ export const commands: Command[] = [
     maxArgs: 1,
     signature: 'join <whatsapp-group-url>',
     run: async (message: Message, client: Client, args: string[]) => {
-      const url = args.join(" ");
+      let url = args.join(" ");
+
+      if (url.startsWith("https://chat.whatsapp.com/")) {
+        url = url.split(".com/")[1]
+      }
 
       try {
         const response = await client.acceptInvite(url)
