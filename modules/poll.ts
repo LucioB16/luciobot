@@ -1,5 +1,5 @@
 import { Client, Contact, List, Message, MessageSendOptions, MessageTypes } from 'whatsapp-web.js'
-import { Command } from '../luciobot'
+import { Command, TelegramBotWrapper } from '../luciobot'
 import * as log from '../lib/log'
 import { Prisma, Vote } from '@prisma/client'
 import * as dbPoll from '../lib/poll'
@@ -20,7 +20,7 @@ export const commands: Command[] = [
     minArgs: 1,
     maxArgs: Infinity,
     signature: 'poll <question>',
-    run: async (message: Message, client: Client, args: string[]) => {
+    run: async (message: Message, client: Client, args: string[], telegramBot?: TelegramBotWrapper) => {
       try {
         const question = args.join(" ")
 
@@ -53,7 +53,7 @@ export const commands: Command[] = [
 
         return newMessage
       } catch (e) {
-        return await log.error(JSON.stringify(e), client)
+        return await log.error({ message: JSON.stringify(e), client: client, telegramBot: telegramBot!})
       }
     }
   },
@@ -68,7 +68,7 @@ export const commands: Command[] = [
     minArgs: 3,
     maxArgs: 3,
     signature: 'add-option <pollId> <quotedMessageId> <description>',
-    run: async (message: Message, client: Client, args: string[]) => {
+    run: async (message: Message, client: Client, args: string[], telegramBot?: TelegramBotWrapper) => {
       try {
         const description = args[2]
 
@@ -148,7 +148,7 @@ export const commands: Command[] = [
 
         return newMessage
       } catch (e) {
-        return await log.error(JSON.stringify(e), client)
+        return await log.error({ message: JSON.stringify(e), client: client, telegramBot: telegramBot!})
       }
     }
   },
@@ -163,7 +163,7 @@ export const commands: Command[] = [
     minArgs: 0,
     maxArgs: 1,
     signature: 'publish',
-    run: async (message: Message, client: Client, args: string[]) => {
+    run: async (message: Message, client: Client, args: string[], telegramBot?: TelegramBotWrapper) => {
       try {
         let hours = 1
         if (args.length > 0) {
@@ -257,7 +257,7 @@ export const commands: Command[] = [
 
         return newMessage;
       } catch (e) {
-        return await log.error(JSON.stringify(e), client)
+        return await log.error({ message: JSON.stringify(e), client: client, telegramBot: telegramBot!})
       }
     }
   },
@@ -272,7 +272,7 @@ export const commands: Command[] = [
     minArgs: 2,
     maxArgs: 2,
     signature: '!vote <option> <pollId>',
-    run: async (message: Message, client: Client, args: string[]) => {
+    run: async (message: Message, client: Client, args: string[], telegramBot?: TelegramBotWrapper) => {
       try {
         const optionOrder = Number(args[0])
 
@@ -340,7 +340,7 @@ export const commands: Command[] = [
           return await message.reply(`Voto cambiado\nOpción anterior: ${oldOption!.content}\nNueva Opción: ${option.content}`)
         }
       } catch (e) {
-        return await log.error(JSON.stringify(e), client)
+        return await log.error({ message: JSON.stringify(e), client: client, telegramBot: telegramBot!})
       }
     }
   },
@@ -355,7 +355,7 @@ export const commands: Command[] = [
     minArgs: 0,
     maxArgs: 0,
     signature: 'results',
-    run: async (message: Message, client: Client, args: string[]) => {
+    run: async (message: Message, client: Client, args: string[], telegramBot?: TelegramBotWrapper) => {
       try {
         if (!message.hasQuotedMsg) {
           return await message.reply("Tenés que citar un mensaje")
@@ -400,7 +400,7 @@ export const commands: Command[] = [
 
         return await message.reply(newMessage.content, newMessage.to, newMessage.options)
       } catch (e) {
-        return await log.error(JSON.stringify(e), client)
+        return await log.error({ message: JSON.stringify(e), client: client, telegramBot: telegramBot!})
       }
     }
   }

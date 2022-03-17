@@ -1,7 +1,7 @@
 'use strict'
 
 import { Client, Message, MessageMedia } from 'whatsapp-web.js'
-import { Command } from '../luciobot'
+import { Command, TelegramBotWrapper } from '../luciobot'
 import * as log from '../lib/log'
 import { getImage } from "../lib/arq-api"
 import axios from "axios";
@@ -19,7 +19,7 @@ export const commands: Command[] = [
     minArgs: 1,
     maxArgs: Infinity,
     signature: 'image <query>',
-    run: async (message: Message, client: Client, args: string[]) => {
+    run: async (message: Message, client: Client, args: string[], telegramBot?: TelegramBotWrapper) => {
       const query = args.join(" ");
       try {
         const imageResult = await getImage(query)
@@ -36,7 +36,7 @@ export const commands: Command[] = [
         return await message.reply(`Couldn't download image for query *${query}*`)
       } catch (e) {
         await message.reply(`Couldn't download image for query *${query}*`)
-        return await log.error(JSON.stringify(e), client)
+        return await log.error({ message: JSON.stringify(e), client: client, telegramBot: telegramBot!})
       }
     }
   }

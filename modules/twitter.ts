@@ -1,5 +1,5 @@
 import { Client, Message, MessageMedia, MessageTypes } from 'whatsapp-web.js'
-import { Command } from '../luciobot'
+import { Command, TelegramBotWrapper } from '../luciobot'
 import * as log from '../lib/log'
 import axios from "axios";
 
@@ -17,7 +17,7 @@ export const commands: Command[] = [
     minArgs: 0,
     maxArgs: 1,
     signature: 'twitter <tweet_url>',
-    run: async (message: Message, client: Client, args: string[]) => {
+    run: async (message: Message, client: Client, args: string[], telegramBot?: TelegramBotWrapper) => {
       let twitterUrl = ""
 
       if (args.length === 0) {
@@ -57,7 +57,7 @@ export const commands: Command[] = [
         return await message.reply(`Please send me link of a tweet containing a video.`)
       } catch (e) {
         await message.reply(`Couldn't download video for ${twitterUrl}`)
-        return await log.error(JSON.stringify(e), client)
+        return await log.error({ message: JSON.stringify(e), client: client, telegramBot: telegramBot!})
       }
     }
   }

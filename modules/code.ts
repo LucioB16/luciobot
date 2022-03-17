@@ -1,5 +1,5 @@
 import { Client, Message, MessageMedia, MessageTypes } from 'whatsapp-web.js'
-import { Command } from '../luciobot'
+import { Command, TelegramBotWrapper } from '../luciobot'
 import * as log from '../lib/log'
 import axios from 'axios'
 
@@ -18,7 +18,7 @@ export const commands: Command[] = [
     minArgs: 1,
     maxArgs: Infinity,
     signature: 'code <language> <input_text>',
-    run: async (message: Message, client: Client, args: string[]) => {
+    run: async (message: Message, client: Client, args: string[], telegramBot?: TelegramBotWrapper) => {
       let language = args[0]
       let inputText: string
       try {
@@ -37,7 +37,7 @@ export const commands: Command[] = [
 
         return await message.reply('Generated with carbon.now.sh', message.from, { media: media })
       } catch (e) {
-        return await log.error(JSON.stringify(e), client)
+        return await log.error( { message:JSON.stringify(e), client: client, telegramBot: telegramBot!})
       }
     }
   }

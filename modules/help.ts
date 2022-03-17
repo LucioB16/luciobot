@@ -1,5 +1,5 @@
 import { Client, Message} from 'whatsapp-web.js'
-import {Command, whatsappClient} from '../luciobot'
+import { Command, TelegramBotWrapper, whatsappClient } from '../luciobot'
 import * as log from '../lib/log'
 
 export const name = 'help'
@@ -15,7 +15,7 @@ export const commands: Command[] = [
     minArgs: 0,
     maxArgs: 1,
     signature: 'help <command_name (Optional)>',
-    run: async (message: Message, client: Client, args: string[]) => {
+    run: async (message: Message, client: Client, args: string[], telegramBot?: TelegramBotWrapper) => {
       try {
         const prefix = whatsappClient.prefixes.has(message.from) ? whatsappClient.prefixes.get(message.from) : '!'
 
@@ -75,7 +75,7 @@ export const commands: Command[] = [
           return await message.reply(outMessage)
         }
       } catch (e: any) {
-        return log.error(e, client)
+        return log.error({ message: e, client: client, telegramBot: telegramBot!})
       }
     }
   }

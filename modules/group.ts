@@ -6,7 +6,7 @@ import WAWebJS, {
   Message,
   MessageMedia,
 } from 'whatsapp-web.js'
-import {Command} from '../luciobot'
+import { Command, TelegramBotWrapper } from '../luciobot'
 import * as log from '../lib/log'
 import axios from "axios";
 
@@ -23,29 +23,29 @@ export const commands: Command[] = [
     minArgs: 0,
     maxArgs: 0,
     signature: 'user-joined',
-    run: async (message: Message, client: Client, args: string[], groupNotification?: GroupNotification) => {
+    run: async (message: Message, client: Client, args: string[], telegramBot?: TelegramBotWrapper, groupNotification?: GroupNotification) => {
       if(!groupNotification) {
-        return await log.warn("user-joined called without group notification", client)
+        return await log.warn({ message: "user-joined called without group notification", client: client, telegramBot: telegramBot!})
       }
 
       try {
 
         const groupId: GroupId = groupNotification.id as GroupId
         if(!groupId) {
-          return await log.error("Error getting chat for group welcome", client)
+          return await log.error({ message: "Error getting chat for group welcome", client: client, telegramBot: telegramBot!})
         }
 
         const chat = await client.getChatById(groupId.remote)
 
         if(!chat) {
-          return await log.error("Error getting chat for group welcome", client)
+          return await log.error({ message: "Error getting chat for group welcome", client: client, telegramBot: telegramBot!})
         }
 
         const contacts = await groupNotification.getRecipients()
         const contact = contacts?.shift()
 
         if (!contact) {
-          return await log.error("Error getting contact for group welcome", client)
+          return await log.error({ message: "Error getting contact for group welcome", client: client, telegramBot: telegramBot!})
         }
 
         let messageContent = `Bienvenidx @${contact.number} al grupo ${chat.name}`
@@ -61,7 +61,7 @@ export const commands: Command[] = [
           mentions: mentions
         })
       } catch (e) {
-        return await log.error(JSON.stringify(e), client)
+        return await log.error({ message: JSON.stringify(e), client: client, telegramBot: telegramBot!})
       }
     }
   },
@@ -76,29 +76,29 @@ export const commands: Command[] = [
     minArgs: 0,
     maxArgs: 0,
     signature: 'user-leave',
-    run: async (message: Message, client: Client, args: string[], groupNotification?: GroupNotification) => {
+    run: async (message: Message, client: Client, args: string[], telegramBot?: TelegramBotWrapper, groupNotification?: GroupNotification) => {
       if(!groupNotification) {
-        return await log.warn("user-leave called without group notification", client)
+        return await log.warn({ message: "user-leave called without group notification", client: client, telegramBot: telegramBot!})
       }
 
       try {
 
         const groupId: GroupId = groupNotification.id as GroupId
         if(!groupId) {
-          return await log.error("Error getting chat for group salute", client)
+          return await log.error({ message: "Error getting chat for group salute", client: client, telegramBot: telegramBot!})
         }
 
         const chat = await client.getChatById(groupId.remote)
 
         if(!chat) {
-          return await log.error("Error getting chat for group salute", client)
+          return await log.error({ message: "Error getting chat for group salute", client: client, telegramBot: telegramBot!})
         }
 
         const contacts = await groupNotification.getRecipients()
         const contact = contacts?.shift()
 
         if (!contact) {
-          return await log.error("Error getting contact for group salute", client)
+          return await log.error({ message: "Error getting contact for group salute", client: client, telegramBot: telegramBot!})
         }
 
         let messageContent = `A casa pete\n\n@${contact.number} fue eliminadx del grupo ${chat.name}`
@@ -110,14 +110,14 @@ export const commands: Command[] = [
         const mentions = [contact]
 
         if (client.info.wid._serialized === contact.id._serialized) {
-          return log.info(`Bot has been removed from group ${chat.name} ${chat.id._serialized}`, client)
+          return log.info({ message:`Bot has been removed from group ${chat.name} ${chat.id._serialized}`, client: client, telegramBot: telegramBot!})
         }
 
         return await client.sendMessage(chat.id._serialized, messageContent, {
           mentions: mentions
         })
       } catch (e) {
-        return await log.error(JSON.stringify(e), client)
+        return await log.error({ message: JSON.stringify(e), client: client, telegramBot: telegramBot!})
       }
     }
   },
@@ -132,22 +132,22 @@ export const commands: Command[] = [
     minArgs: 0,
     maxArgs: 0,
     signature: 'group-update',
-    run: async (message: Message, client: Client, args: string[], groupNotification?: GroupNotification) => {
+    run: async (message: Message, client: Client, args: string[], telegramBot?: TelegramBotWrapper, groupNotification?: GroupNotification) => {
       if(!groupNotification) {
-        return await log.warn("group-update called without group notification", client)
+        return await log.warn({ message: "group-update called without group notification", client: client, telegramBot: telegramBot!})
       }
 
       try {
 
         const groupId: GroupId = groupNotification.id as GroupId
         if(!groupId) {
-          return await log.error("Error getting chat for group salute", client)
+          return await log.error({ message: "Error getting chat for group salute", client: client, telegramBot: telegramBot!})
         }
 
         const chat = (await client.getChatById(groupId.remote)) as GroupChat
 
         if(!chat) {
-          return await log.error("Error getting chat for group salute", client)
+          return await log.error({ message: "Error getting chat for group salute", client: client, telegramBot: telegramBot!})
         }
 
         let messageContent = ""
@@ -175,10 +175,10 @@ export const commands: Command[] = [
             }
 
           default:
-            return await log.error(`Group Notification Type not supported ${groupNotification.type}`, client)
+            return await log.error({ message: `Group Notification Type not supported ${groupNotification.type}`, client: client, telegramBot: telegramBot!})
         }
       } catch (e) {
-        return await log.error(JSON.stringify(e), client)
+        return await log.error({ message: JSON.stringify(e), client: client, telegramBot: telegramBot!})
       }
     }
   },
@@ -193,7 +193,7 @@ export const commands: Command[] = [
     minArgs: 1,
     maxArgs: 1,
     signature: 'join <whatsapp-group-url>',
-    run: async (message: Message, client: Client, args: string[]) => {
+    run: async (message: Message, client: Client, args: string[], telegramBot?: TelegramBotWrapper) => {
       let url = args.join(" ");
 
       if (url.startsWith("https://chat.whatsapp.com/")) {
@@ -207,7 +207,7 @@ export const commands: Command[] = [
       } catch (e) {
         console.log(e)
         await message.reply("That invite code seems to be invalid.")
-        return await log.error(JSON.stringify(e), client)
+        return await log.error({ message: JSON.stringify(e), client: client, telegramBot: telegramBot!})
       }
     }
   },
@@ -222,18 +222,18 @@ export const commands: Command[] = [
     minArgs: 0,
     maxArgs: 0,
     signature: 'message-revoked',
-    run: async (message: Message, client: Client, args: string[]) => {
+    run: async (message: Message, client: Client, args: string[], telegramBot?: TelegramBotWrapper) => {
       try {
         let chat = await message.getChat() as GroupChat
 
         if(!chat) {
-          return await log.error("Error getting chat for group welcome", client)
+          return await log.error({ message: "Error getting chat for group welcome", client: client, telegramBot: telegramBot!})
         }
 
         const contact = await client.getContactById(message.author ?? '')
 
         if (!contact) {
-          return await log.error("Error getting contact for group welcome", client)
+          return await log.error({ message: "Error getting contact for group welcome", client: client, telegramBot: telegramBot!})
         }
 
         let messageContent = `Qué borras @${contact.number}? Te vi gil.`
@@ -245,7 +245,7 @@ export const commands: Command[] = [
         })
       } catch (e) {
         console.log(e)
-        return await log.error(JSON.stringify(e), client)
+        return await log.error({ message: JSON.stringify(e), client: client, telegramBot: telegramBot!})
       }
     }
   }

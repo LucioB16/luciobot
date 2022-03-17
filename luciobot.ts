@@ -11,12 +11,35 @@ import {
   MessageTypes
 } from 'whatsapp-web.js'
 import * as qrcode from 'qrcode-terminal'
+import * as qrImage from 'qr-image'
 import * as dotenv from 'dotenv'
 import * as fs from 'fs'
 import * as log from './lib/log'
 import { mockMessage } from './lib/mock-wa'
+import { startBot } from './lib/telegram'
+import { Context, Telegraf } from 'telegraf'
+import { Update } from 'typegram'
 
 dotenv.config()
+
+export type TelegramBotWrapper = {
+  bot? : Telegraf<Context<Update>>,
+  notificationsChannelId : string
+}
+
+let telegram: TelegramBotWrapper | null
+
+let botPromise = startBot(process.env.TELEGRAM_BOT_TOKEN as string)
+
+Promise.all([botPromise]).then((result) => {
+  if (result.length > 0) {
+    telegram = {
+      bot : result[0],
+      notificationsChannelId : process.env.TELEGRAM_CHANNEL_ID as string
+    }
+  }
+})
+  .catch((err) => log.error({message: JSON.stringify(err)}))
 
 type ClientWrapper = {
   prefixes: Map<string, string>,
@@ -54,28 +77,33 @@ whatsappClient['client'] = client
 whatsappClient['log'] = log
 
 if (!process.env.OWNER_WHATSAPP_ID) {
-  log.error('No owner user WhatsApp ID supplied. Set the OWNER_WHATSAPP_ID environment variable.')
+  log.error({message: 'No owner user WhatsApp ID supplied. Set the OWNER_WHATSAPP_ID environment variable.', telegramBot: telegram!})
 }
 
 const ownerId = process.env.OWNER_WHATSAPP_ID ?? ''
 
 client.on(Events.QR_RECEIVED, (qr) => {
   qrcode.generate(qr, { small: true })
-  log.info('Scan the QR Code to start the whatsapp web client.')
+  if (telegram && telegram.bot) {
+    const image = qrImage.image(qr, { type: 'png' })
+    telegram.bot.telegram.sendPhoto(telegram.notificationsChannelId, {source: image})
+  }
+
+  log.info({ message: 'Scan the QR Code to start the whatsapp web client.', telegramBot: telegram!})
 })
 
 client.on(Events.AUTHENTICATED, (session) => {
   if (session === undefined) {
-    log.info('Auth successful')
+    log.info({ message: 'Auth successful', telegramBot: telegram!})
   }
   else {
-    log.info('Copy the value below without line breaks and set it to WA_SESSION environment variable.\n' +
-      `'${JSON.stringify(session)}'`)
+    log.info({ message:'Copy the value below without line breaks and set it to WA_SESSION environment variable.\n' +
+      `'${JSON.stringify(session)}'`, telegramBot: telegram!})
   }
 })
 
 client.on(Events.AUTHENTICATION_FAILURE, (message) => {
-  log.error(`Auth failure: ${message}`)
+  log.error({ message:`Auth failure: ${message}`, telegramBot: telegram!})
 })
 
 export type Command = {
@@ -89,7 +117,7 @@ export type Command = {
   cooldown?: number,
   aliases?: string[],
   signature: string,
-  run (message: Message, client: Client, args: string[], groupNotification?: GroupNotification): Promise<Message | undefined>
+  run (message: Message, client: Client, args: string[], telegramBot?: TelegramBotWrapper, groupNotification?: GroupNotification): Promise<Message | undefined>
 }
 
 export type Event = {
@@ -135,7 +163,7 @@ export const loadModule = (name: string, initial: boolean = false) => {
       return
     }
 
-    log.info(`Loading module ${name}`, client)
+    log.info({ message: `Loading module ${name}`, client: client, telegramBot: telegram!})
 
     saveModule(module)
 
@@ -144,7 +172,7 @@ export const loadModule = (name: string, initial: boolean = false) => {
         x.interval = setInterval(() => x.job(client), x.period * 1000)
         if (x.runInstantly) {
           x.job(client)
-            .catch(log.warn)
+            .catch((err) => log.warn({ message: err, telegramBot: telegram!}))
         }
       })
     }
@@ -164,7 +192,7 @@ export const loadModule = (name: string, initial: boolean = false) => {
       })
     }
     whatsappClient.loadedModules.set(name, module)
-  }).catch(err => log.warn(err, client))
+  }).catch(err => log.warn({ message:err, client: client, telegramBot: telegram!}))
 }
 
 export const unloadModule = (name: string) => {
@@ -220,7 +248,7 @@ const runCommand = async (message: Message, command: Command, args: string[], gr
   }
    */
   if(message !== mockMessage){
-    await log.info(`Chat: ${message.from} - Author: ${message.author} - Content: ${message.body}`)
+    await log.info({message: `Chat: ${message.from} - Author: ${message.author} - Content: ${message.body}`})
   }
 
   if (args.length > command.maxArgs) {
@@ -235,15 +263,15 @@ const runCommand = async (message: Message, command: Command, args: string[], gr
     if (command.adminOnly && ownerId !== message.author && ownerId !== message.from) {
       return message.reply(`You don't have permission to execute this command, which requires ownership of this bot.`, message.from)
     }
-    return await command.run(message, client, args, groupNotification)
+    return await command.run(message, client, args, telegram!, groupNotification)
   } catch (e) {
     await message.reply(`Error: \`${e}\``, message.from)
-    return log.warn(`\`${command.name} ${args}\` errored with \`${e}\``, client)
+    return log.warn({ message:`\`${command.name} ${args}\` errored with \`${e}\``, client: client, telegramBot: telegram!})
   }
 }
 
 client.on(Events.READY, async () => {
-  log.info(`Client is ready! Logged in as: Name: ${client.info.pushname} - WhatsApp ID: ${client.info.wid.user}`, client)
+  log.info({ message:`Client is ready! Logged in as: Name: ${client.info.pushname} - WhatsApp ID: ${client.info.wid.user}`, client: client, telegramBot: telegram!})
 
   if (whatsappClient.loadedModules.size > 0) {
     savedModules.push(...whatsappClient.loadedModules.keys())
@@ -251,7 +279,7 @@ client.on(Events.READY, async () => {
 
   fs.readdir('./modules/', (err, files) => {
     if (err) {
-      return log.error('Failed to load modules folder', client)
+      return log.error({ message:'Failed to load modules folder', client: client, telegramBot: telegram!})
     } else {
       files.forEach(async file => {
         const name = file.split('.')[0]
@@ -261,7 +289,7 @@ client.on(Events.READY, async () => {
     }
   })
 
-  log.info(`Client is ready! Name: ${client.info.pushname} - WhatsApp ID: ${client.info.wid.user}`)
+  log.info({ message:`Client is ready! Name: ${client.info.pushname} - WhatsApp ID: ${client.info.wid.user}`, telegramBot: telegram!})
 })
 
 const defaultCommand: Command = {
@@ -390,16 +418,16 @@ client.on(Events.MESSAGE_RECEIVED, async (message: Message) => {
 // })
 
 client.on(Events.DISCONNECTED, (state) => {
-  log.warn(`${state}`)
+  log.warn({ message:`${state}`, telegramBot: telegram!})
 })
 
 client.on(Events.AUTHENTICATION_FAILURE, (state) => {
-  log.warn(`${state}`)
+  log.warn({ message:`${state}`, telegramBot: telegram!})
 })
 
 client.on(Events.BATTERY_CHANGED, (batteryInfo) => {
   if (batteryInfo.battery < 15 && !batteryInfo.plugged) {
-    log.warn(`Low battery level: ${batteryInfo.battery}%`)
+    log.warn({ message:`Low battery level: ${batteryInfo.battery}%`, telegramBot: telegram!})
   }
 })
 

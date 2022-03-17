@@ -1,5 +1,5 @@
-import { Client, Message } from 'whatsapp-web.js'
-import { Command } from '../luciobot'
+import { Client, GroupNotification, Message } from 'whatsapp-web.js'
+import { Command, TelegramBotWrapper } from '../luciobot'
 import * as log from '../lib/log'
 
 export const name = 'admin'
@@ -15,7 +15,7 @@ export const commands: Command[] = [
     minArgs: 1,
     maxArgs: 2,
     signature: 'notify <event> <time-hours>',
-    run: async (message: Message, client: Client, args: string[]) => {
+    run: async (message: Message, client: Client, args: string[], telegramBot?:TelegramBotWrapper) => {
       const event = args[0]
 
       let time = 1
@@ -51,7 +51,7 @@ export const commands: Command[] = [
 
         return await message.reply("Notificaciones enviadas")
       } catch (e) {
-        return await log.error(JSON.stringify(e), client)
+        return await log.error({ message: JSON.stringify(e), client: client, telegramBot: telegramBot!})
       }
     }
   }

@@ -1,5 +1,5 @@
 import { Client, Message, MessageMedia, MessageTypes } from 'whatsapp-web.js'
-import { Command } from '../luciobot'
+import { Command, TelegramBotWrapper } from '../luciobot'
 import * as log from '../lib/log'
 import * as TikTokScraper from 'tiktok-scraper'
 import { Options } from "tiktok-scraper"
@@ -20,7 +20,7 @@ export const commands: Command[] = [
     minArgs: 0,
     maxArgs: 1,
     signature: 'tiktok <tiktok_url>',
-    run: async (message: Message, client: Client, args: string[]) => {
+    run: async (message: Message, client: Client, args: string[], telegramBot?: TelegramBotWrapper) => {
       const tmpDir = tmp.dirSync()
 
       const options: Options = {
@@ -78,7 +78,7 @@ export const commands: Command[] = [
         await fs.emptydir(tmpDir.name)
         tmpDir.removeCallback()
         await message.reply(`Couldn't download video for ${tiktokUrl}`)
-        return await log.error(JSON.stringify(e), client)
+        return await log.error({ message: JSON.stringify(e), client: client, telegramBot: telegramBot!})
       }
     }
   }

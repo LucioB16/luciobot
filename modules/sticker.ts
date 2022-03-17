@@ -1,5 +1,5 @@
 import { Client, Message, MessageMedia, MessageSendOptions, MessageTypes } from 'whatsapp-web.js'
-import { Command } from '../luciobot'
+import { Command, TelegramBotWrapper } from '../luciobot'
 import * as log from '../lib/log'
 
 export const name = 'sticker'
@@ -18,7 +18,7 @@ export const commands: Command[] = [
     minArgs: 0,
     maxArgs: 3,
     signature: 'sticker <sticker_name (optional)> <sticker_author (optional)> <emojis (optional)>',
-    run: async (message: Message, client: Client, args: string[]) => {
+    run: async (message: Message, client: Client, args: string[], telegramBot?: TelegramBotWrapper) => {
       const messageOptions: MessageSendOptions = { sendMediaAsSticker: true }
       switch (args.length) {
         case 0:
@@ -71,7 +71,7 @@ export const commands: Command[] = [
         return await message.reply(media, message.from, messageOptions)
       } catch (e) {
         await message.reply("Couldn't generate sticker")
-        return await log.error(JSON.stringify(e), client)
+        return await log.error({ message: JSON.stringify(e), client: client, telegramBot: telegramBot!})
       }
     }
   }

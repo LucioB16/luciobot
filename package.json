@@ -20,7 +20,9 @@
     "enmap": "^5.8.8",
     "fs-extra": "^10.0.1",
     "node-cron": "^3.0.0",
+    "qr-image": "^3.2.0",
     "qrcode-terminal": "^0.12.0",
+    "telegraf": "^4.7.0",
     "tiktok-scraper": "^1.4.36",
     "tmp": "^0.2.1",
     "whatsapp-web.js": "^1.16.4",
@@ -29,6 +31,7 @@
   "devDependencies": {
     "@types/fs-extra": "^9.0.13",
     "@types/node": "^17.0.21",
+    "@types/qr-image": "^3.2.5",
     "@types/qrcode-terminal": "^0.12.0",
     "@types/tmp": "^0.2.3",
     "chai": "^4.3.6",
