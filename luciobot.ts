@@ -22,25 +22,6 @@ import { Update } from 'typegram'
 
 dotenv.config()
 
-export type TelegramBotWrapper = {
-  bot? : Telegraf<Context<Update>>,
-  notificationsChannelId : string
-}
-
-let telegram: TelegramBotWrapper | null
-
-let botPromise = startBot(process.env.TELEGRAM_BOT_TOKEN as string)
-
-Promise.all([botPromise]).then((result) => {
-  if (result.length > 0) {
-    telegram = {
-      bot : result[0],
-      notificationsChannelId : process.env.TELEGRAM_CHANNEL_ID as string
-    }
-  }
-})
-  .catch((err) => log.error({message: JSON.stringify(err)}))
-
 type ClientWrapper = {
   prefixes: Map<string, string>,
   loadedCommands: Map<string, Command>,
@@ -65,6 +46,25 @@ if (chromePath !== '') {
 }
 
 const client = new Client(clientOptions)
+
+export type TelegramBotWrapper = {
+  bot? : Telegraf<Context<Update>>,
+  notificationsChannelId : string
+}
+
+let telegram: TelegramBotWrapper | null
+
+let botPromise = startBot(process.env.TELEGRAM_BOT_TOKEN as string)
+
+Promise.all([botPromise]).then((result) => {
+  if (result.length > 0) {
+    telegram = {
+      bot : result[0],
+      notificationsChannelId : process.env.TELEGRAM_CHANNEL_ID as string
+    }
+  }
+})
+  .catch((err) => log.error({message: JSON.stringify(err)}))
 
 export const whatsappClient: ClientWrapper = {
   loadedCommands: new Map<string, Command>(),
@@ -419,16 +419,12 @@ client.on(Events.MESSAGE_RECEIVED, async (message: Message) => {
 
 client.on(Events.DISCONNECTED, (state) => {
   log.warn({ message:`${state}`, telegramBot: telegram!})
+  client.initialize()
 })
 
 client.on(Events.AUTHENTICATION_FAILURE, (state) => {
   log.warn({ message:`${state}`, telegramBot: telegram!})
-})
-
-client.on(Events.BATTERY_CHANGED, (batteryInfo) => {
-  if (batteryInfo.battery < 15 && !batteryInfo.plugged) {
-    log.warn({ message:`Low battery level: ${batteryInfo.battery}%`, telegramBot: telegram!})
-  }
+  client.initialize()
 })
 
 client.on(Events.GROUP_JOIN, async (notification) => {
@@ -446,5 +442,41 @@ client.on(Events.GROUP_UPDATE, async (notification) => {
 client.on(Events.MESSAGE_REVOKED_EVERYONE, async (message) => {
   await runCommand(message, whatsappClient.loadedCommands.get("message-revoked") ?? defaultCommand, [])
 })
+
+export const getClientState = () => {
+  return client.getState()
+}
+
+export const getClientInfo = () => {
+  if (client) {
+    return client.info
+  }
+  return null
+}
+
+export const getWWebVersion = () => {
+  if (client) {
+    return client.getWWebVersion()
+  }
+  return null
+}
+
+export const resetClient = () => {
+  if (client) {
+    return client.resetState()
+  }
+  return null
+}
+
+export const logout = () => {
+  if (client) {
+    return client.logout()
+  }
+  return null
+}
+
+export const initialize = () => {
+  return client.initialize()
+}
 
 client.initialize()
