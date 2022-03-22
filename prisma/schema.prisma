@@ -38,3 +38,13 @@ model Poll {
   published Boolean @default(false)
   options Option[]
 }
+
+model Reminder {
+  id Int @id @default(autoincrement())
+  chatId String
+  author String
+  content String
+  mentions String[]
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+}

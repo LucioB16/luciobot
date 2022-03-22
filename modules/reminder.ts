@@ -1,13 +1,9 @@
-import { Client, Contact, List, Message, MessageSendOptions, MessageTypes } from 'whatsapp-web.js'
+import { Client, Contact, Message} from 'whatsapp-web.js'
 import { Command, TelegramBotWrapper } from '../luciobot'
 import * as log from '../lib/log'
+import * as dbReminder from '../lib/reminder'
 
 export const name = 'reminder'
-
-type ContactDB = {
-  contactId: string,
-  number: string
-}
 
 export const commands: Command[] = [
   {
@@ -29,22 +25,30 @@ export const commands: Command[] = [
           return message.reply('El primer argumento debe ser un número de hora')
         }
 
+        const expiresAt = new Date()
+
+        expiresAt.setHours(expiresAt.getHours() + hours)
+
         const content = args.slice(1).join(' ')
 
         const mentions = await message.getMentions()
 
-        let mentionedContacts: ContactDB[] = []
+        const mentionedContacts: string[] = []
 
         for (let mention of mentions) {
-          mentionedContacts.push({
-            contactId: mention.id._serialized,
-            number: mention.number
-          })
+          mentionedContacts.push(mention.id._serialized)
         }
 
-        // TODO: insert reminder in DB
-
-        const replyText = `Recordatorio registrado para dentro de ${args[0]} horas\nTexto: ${content}`
+        const chatId = (await message.getChat()).id._serialized
+        const author = message.author ?? message.from
+        await dbReminder.createReminder({
+          chatId: chatId,
+          author: author,
+          expiresAt: expiresAt,
+          mentions: mentionedContacts,
+          content: content
+        })
+        const replyText = `Recordatorio registrado para dentro de ${args[0]} horas\n\nTexto:\n${content}`
 
         return message.reply(replyText, message.from, { mentions: mentions })
       }
@@ -56,7 +60,21 @@ export const commands: Command[] = [
 ]
 
 const checkReminders = async (client: Client) => {
-  // TODO: get reminders from DB and send them
+  const reminders = await dbReminder.getExpiredReminders()
+
+  for (let reminder of reminders) {
+
+    const mentions: Contact[] = []
+
+    for (let mention of reminder.mentions) {
+      let contact = await client.getContactById(mention)
+      mentions.push(contact)
+    }
+
+    await client.sendMessage(reminder.chatId, reminder.content, { mentions: mentions })
+
+    await dbReminder.deleteReminder(reminder.id)
+  }
 }
 
 export const jobs = [
