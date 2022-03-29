@@ -1,11 +1,11 @@
-import axios from 'axios'
+import axios, { AxiosRequestConfig } from 'axios'
 
 type LibreTranslateResponse = {
     translatedText?: string,
     error?: string
 }
 
-export const translate = 
+export const translate =
 async (text: string, sourceLang: string, targetLang: string) : Promise<string> => {
     const config: AxiosRequestConfig = {
         method: 'post',
@@ -29,5 +29,9 @@ async (text: string, sourceLang: string, targetLang: string) : Promise<string> =
         config
     )
 
-    return response.translatedText
+    if (response.status < 200 || response.status >= 300) {
+      throw new Error("Error in translate request. " + response.data.error)
+    }
+
+    return response.data.translatedText ?? ""
 }
