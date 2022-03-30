@@ -163,8 +163,6 @@ export const loadModule = (name: string, initial: boolean = false) => {
       return
     }
 
-    log.info({ message: `Loading module ${name}`, client: client, telegramBot: telegram!})
-
     saveModule(module)
 
     if (module.jobs) {
@@ -281,11 +279,17 @@ client.on(Events.READY, async () => {
     if (err) {
       return log.error({ message:'Failed to load modules folder', client: client, telegramBot: telegram!})
     } else {
+      let loadedModulesText = "Loaded modules:\n\n"
+
       files.forEach(async file => {
         const name = file.split('.')[0]
         availableModules.push(name)
         loadModule(name, true)
+
+        loadedModulesText += `${name}\n`
       })
+
+      log.info({ message: loadedModulesText, client: client, telegramBot: telegram!})
     }
   })
 
