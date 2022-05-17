@@ -16,7 +16,7 @@ export const commands: Command[] = [
     cooldown: 0,
     minArgs: 2,
     maxArgs: Infinity,
-    signature: 'poll <hours> <content>',
+    signature: 'reminder <hours> <content>',
     run: async (message: Message, client: Client, args: string[], telegramBot?: TelegramBotWrapper) => {
       try {
         const hours = Number(args[0])

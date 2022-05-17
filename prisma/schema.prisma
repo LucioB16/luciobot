@@ -48,3 +48,12 @@ model Reminder {
   createdAt DateTime @default(now())
   expiresAt DateTime
 }
+
+model Session {
+  id Int @id @default(autoincrement())
+  userId String
+  filename String
+  file Bytes
+  createdAt DateTime @default(now())
+  active Boolean @default(true)
+}
